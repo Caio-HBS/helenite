@@ -29,8 +29,8 @@ class Profile(models.Model):
     first_name = models.CharField(max_length=15, null=False, blank=False)
     last_name = models.CharField(max_length=15, null=False, blank=False)
     birthday = models.DateField(null=False, blank=False)
-    birth_place = models.CharField(null=False, blank=False)
-    custom_slug_profile = models.SlugField(max_length=15, blank=True, unique=True)
+    birth_place = models.CharField(max_length=50, null=False, blank=False)
+    custom_slug_profile = models.SlugField(max_length=15, unique=True, null=True, blank=True)
     friends = models.ManyToManyField("self", blank=True)
     private_profile = models.BooleanField(default=False)
     show_birthday = models.BooleanField(default=True)
@@ -72,7 +72,7 @@ class Post(models.Model):
     post_text = models.TextField(max_length=300, blank=True)
     post_image = models.ImageField(upload_to="post_images", blank=True)
     post_publication_date = models.DateTimeField(auto_now_add=True)
-    post_slug = models.SlugField(max_length=15, blank=True, unique=True)
+    post_slug = models.SlugField(max_length=15, unique=True, null=True, blank=True)
     post_likes = models.ManyToManyField(
         User, through="Like", related_name="liked_posts"
     )
