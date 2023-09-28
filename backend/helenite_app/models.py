@@ -144,5 +144,11 @@ class Comment(models.Model):
     comment_text = models.TextField(max_length=500, null=False, blank=False)
     comment_publication_date = models.DateTimeField(auto_now_add=True)
 
+    def save(self, **kwargs):
+        if not self.comment_text:
+            raise ValidationError("You can't create a comment with no text.")
+        
+        super().save(**kwargs)
+
     def __str__(self):
         return f"{self.comment_text[:16]}... - by: {self.comment_user.username}, in {self.comment_parent_post.post_parent_user.username}"
