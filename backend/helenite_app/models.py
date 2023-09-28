@@ -79,11 +79,10 @@ class Post(models.Model):
 
     def __str__(self):
         return f"{self.post_text[:16]}... - by {self.post_parent_user.username}"
-
+    
     def clean(self):
         """
-        Guarantees that either an image or a text is present on the instance before
-        saving.
+        Prevents the user from creating a post with no image and no text.
         """
         if not self.post_text and not self.post_image:
             raise ValidationError("A post cannot be empty.")
@@ -91,12 +90,17 @@ class Post(models.Model):
     def save(self, **kwargs):
         """
         Provides an automatic slug generator for posts based on username and
-        random string.
+        random string, as well as guarantees that either an image or a text is 
+        present on the instance before saving
         """
+
+        if not self.post_text and not self.post_image:
+            raise ValidationError("A post cannot be empty.")
+
         if not self.post_slug:
             self.post_slug = "".join(
                 random.SystemRandom().choice(string.ascii_uppercase + string.digits)
-                for _ in range(8)
+                for _ in range(14)
             )
         super().save(**kwargs)
 

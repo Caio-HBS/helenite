@@ -6,7 +6,7 @@ from helenite_app.models import Profile
 
 
 @pytest.fixture
-def create_new_user(client, db):
+def create_new_user(db):
     """
     Creates a new user in the test db.
     """
@@ -18,7 +18,7 @@ def create_new_user(client, db):
 
 
 @pytest.fixture
-def valid_data_for_user_and_profile(client, db, create_new_user):
+def valid_data_for_user_and_profile(db, create_new_user):
     """
     Provides data for the creation of a profile.
     """
@@ -30,4 +30,15 @@ def valid_data_for_user_and_profile(client, db, create_new_user):
         "birthday": "2001-01-01",
         "birth_place": "United States",
         "custom_slug_profile": "test",
+    }
+
+
+@pytest.fixture
+def valid_data_for_post(db, create_new_user):
+    return {
+        "post_parent_user": create_new_user,
+        "post_text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "post_image": "",
+        "post_publication_date": "2001-01-01 00:00:00",
+        "post_slug": "hfjk8y790",
     }
