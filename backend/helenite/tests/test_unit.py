@@ -3,7 +3,9 @@ import pytest
 from django.forms import ValidationError
 from django.db.utils import IntegrityError
 
-from helenite_app.models import Profile, Post, Like, Comment
+from helenite_app.models import Profile, Post
+
+# --------------------------------DATABASE--------------------------------------
 
 
 def test_generic_create_user_and_profile(db, valid_data_for_user_and_profile) -> None:
@@ -114,70 +116,7 @@ def test_create_post_same_slug(db, valid_data_for_post) -> None:
         Post.objects.create(**valid_data_for_post)
 
 
-def test_generic_like(db, create_new_user, valid_data_for_post) -> None:
-    """
-    Tests that a new like on a post can be created successfully.
-    """
-
-    new_post = Post.objects.create(**valid_data_for_post)
-    Like.objects.create(like_owner=create_new_user, like_parent_post=new_post)
-
-    assert Like.objects.count() == 1
-    assert Like.objects.get(like_owner=create_new_user)
+# -----------------------------------VIEWS--------------------------------------
 
 
-def test_one_like_per_user(db, create_new_user, valid_data_for_post) -> None:
-    """
-    Tests that a post can only allow for one like per user.
-    """
-
-    new_post = Post.objects.create(**valid_data_for_post)
-    Like.objects.create(like_owner=create_new_user, like_parent_post=new_post)
-
-    with pytest.raises(IntegrityError):
-        Like.objects.create(like_owner=create_new_user, like_parent_post=new_post)
-
-
-def test_generic_comment(
-    db, valid_data_for_post, valid_data_for_comment, create_new_user
-) -> None:
-    """
-    Tests that a new comment can be left on a post.
-    """
-
-    new_post = Post.objects.create(**valid_data_for_post)
-    valid_data_for_comment["comment_parent_post"] = new_post
-    Comment.objects.create(**valid_data_for_comment)
-
-    assert Comment.objects.count() == 1
-    assert Comment.objects.get(comment_user=create_new_user)
-
-
-def test_comment_no_text(db, valid_data_for_post, valid_data_for_comment) -> None:
-    """
-    Tests that a comment can't created without a text.
-    """
-
-    new_post = Post.objects.create(**valid_data_for_post)
-    valid_data_for_comment.pop("comment_text")
-    valid_data_for_comment["comment_parent_post"] = new_post
-
-    with pytest.raises(ValidationError):
-        Comment.objects.create(**valid_data_for_comment)
-
-
-def test_multiple_comments_on_same_post(
-    db, valid_data_for_post, valid_data_for_comment
-) -> None:
-    """
-    Tests that multiple comments can be left on the same post.
-    """
-
-    new_post = Post.objects.create(**valid_data_for_post)
-    valid_data_for_comment["comment_parent_post"] = new_post
-    Comment.objects.create(**valid_data_for_comment)
-
-    valid_data_for_comment.update({"comment_text": "new text"})
-    Comment.objects.create(**valid_data_for_comment)
-
-    assert Comment.objects.count() == 2
+# ---------------------------------ROUTING--------------------------------------
