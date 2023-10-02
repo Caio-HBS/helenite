@@ -2,6 +2,7 @@ import random
 import string
 
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 from django.forms import ValidationError
 from django.contrib.auth.models import User
@@ -76,6 +77,13 @@ class Post(models.Model):
     post_likes = models.ManyToManyField(
         User, through="Like", related_name="liked_posts"
     )
+
+    def get_absolute_url(self):
+        return f"{reverse('single_post_endpoint', kwargs={'post_slug': self.post_slug})}"
+    
+    @property
+    def endpoint(self):
+        return self.get_absolute_url()
 
     def __str__(self):
         return f"{self.post_text[:16]}... - by {self.post_parent_user.username}"
