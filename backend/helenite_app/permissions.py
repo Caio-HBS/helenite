@@ -13,7 +13,6 @@ class TokenAgePermission(permissions.BasePermission):
         if request.user.is_authenticated:
             try:
                 token = Token.objects.get(user=request.user)
-
                 if (timezone.now() - token.created) > timedelta(days=7):
                     return False
 

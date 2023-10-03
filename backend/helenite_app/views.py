@@ -7,11 +7,13 @@ from rest_framework import generics, serializers, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
 from helenite_app.models import Profile, Post, Like, Comment
 from helenite_app.serializers import FeedSerializer, NewPostSerializer
+from helenite_app.authentication import TokenAuthentication
 from helenite_app.permissions import TokenAgePermission
 
 
@@ -23,7 +25,7 @@ class LoginView(ObtainAuthToken):
     7 days.
 
     Endpoint URL: /api/v1/login/
-    HTTP Methods Allowed:  POST
+    HTTP Methods Allowed: POST
     """
 
     def post(self, request, *args, **kwargs):
@@ -53,12 +55,13 @@ class LogoutView(APIView):
     sessions, as well as delete the current token.
 
     Endpoint URL: /api/v1/logout/
-    HTTP Methods Allowed:  POST
+    HTTP Methods Allowed: POST
     """
     permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def post(self, request):
-        print(request)
+        
         token = Token.objects.get(user=request.user)
         token.delete()
 
@@ -78,6 +81,7 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
     """
 
     permission_classes = [IsAuthenticated, TokenAgePermission]
+    authentication_classes = [TokenAuthentication]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
