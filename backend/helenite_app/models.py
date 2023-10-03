@@ -41,17 +41,30 @@ class Profile(models.Model):
 
     def save(self, **kwargs):
         """
-        Provides an automatic slug based on username.
+        Provides an automatic slug based on username as well as a default profile
+        picture.
         """
+
         if not self.custom_slug_profile:
             self.custom_slug_profile = slugify(self.user.username)
+
+        if not self.pfp:
+            self.pfp = "profile_pictures/default_pfp.png"
         super().save(**kwargs)
 
     def get_full_name(self):
         """
         Returns the full name associated with the profile.
         """
+
         return f"{self.first_name} {self.last_name}"
+    
+    def get_absolute_url(self):
+        return f"{reverse('profile_info_endpoint', kwargs={'custom_slug_profile': self.custom_slug_profile})}"
+    
+    @property
+    def endpoint(self):
+        return self.get_absolute_url()
 
 
 class Post(models.Model):

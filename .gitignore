@@ -159,8 +159,11 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
 database/
 
 assets/favicon.png
 assets/palette.png
-backend/uploads
+
+backend/uploads/post_images/
+backend/uploads/profile_pictures/* !backend/uploads/profile_pictures/default_pfp.png

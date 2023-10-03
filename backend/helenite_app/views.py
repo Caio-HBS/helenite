@@ -68,6 +68,13 @@ class LogoutView(APIView):
         return Response({'message': 'Logout successfull.'}, status=status.HTTP_200_OK)
 
 
+class RegisterCreateAPIView(generics.CreateAPIView):
+    """
+    TODO: Add documentation.
+    """
+    pass
+
+
 class FeedListCreateAPIView(generics.ListCreateAPIView):
     """
     API view to retrieve the feed for a given logged-in user, as well as to create
@@ -81,7 +88,7 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
     """
 
     permission_classes = [IsAuthenticated, TokenAgePermission]
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -112,6 +119,31 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
         serializer.save(post_parent_user=get_user)
 
 
+class DiscoverListAPIView(generics.ListAPIView):
+    """
+    TODO: Add documentation.
+    """
+    pass
+
+
+class ProfileRetriveAPIView(generics.RetrieveAPIView):
+    """
+    TODO: Add documentation.
+    """
+    lookup_field = "custom_slug_profile"
+    queryset = Profile.objects.all()
+
+
+class ChangeSettingsUpdateAPIView(generics.UpdateAPIView):
+    """
+    TODO: Add documentation.
+    """
+    pass
+
+
 class PostRetriveAPIView(generics.RetrieveAPIView):
+    """
+    TODO: Add documentation.
+    """
     lookup_field = "post_slug"
     queryset = Post.objects.all()

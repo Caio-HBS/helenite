@@ -1,12 +1,14 @@
-from django.contrib import admin
 from django.urls import path
 
+from helenite_app import views
 
 urlpatterns = [
-    path("login/", name="login_endpoint"),
-    path("register/", name="register_new_user"),
-    path("feed/", name="feed_endpoint"),
-    path("feed/discover/", name="discover_endpoint"),
-    path("profile/<int:pk>/", name="profile_info_endpoint"),
-    path("profile/<int:pk>/change-settings", name="change_settings_endpoint"),
+    path("login/", views.LoginView.as_view(), name="login_endpoint"),
+    path("logout/", views.LogoutView.as_view(), name="logout_endpoint"),
+    path("register/", views.RegisterCreateAPIView.as_view(), name="register_new_user"),
+    path("feed/", views.FeedListCreateAPIView.as_view(), name="feed_endpoint"),
+    path("feed/discover/", views.DiscoverListAPIView.as_view(), name="discover_endpoint"),
+    path("profile/<slug:custom_slug_profile>/", views.ProfileRetriveAPIView.as_view(), name="profile_info_endpoint"),
+    path("profile/<slug:custom_slug_profile>/change-settings/", views.ChangeSettingsUpdateAPIView.as_view(), name="change_settings_endpoint"),
+    path("profile/post/<slug:post_slug>/", views.PostRetriveAPIView.as_view(), name="single_post_endpoint"),
 ]
