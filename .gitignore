@@ -167,3 +167,4 @@ assets/palette.png
 
 backend/uploads/post_images/
 backend/uploads/profile_pictures/* !backend/uploads/profile_pictures/default_pfp.png
+backend/uploads/profile_pictures/*

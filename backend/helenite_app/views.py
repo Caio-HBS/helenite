@@ -1,6 +1,7 @@
 from django.utils import timezone
 
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 from rest_framework import generics, serializers, status
@@ -12,7 +13,12 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
 from helenite_app.models import Profile, Post, Like, Comment
-from helenite_app.serializers import FeedSerializer, NewPostSerializer
+from helenite_app.serializers import (
+    FeedSerializer,
+    NewPostSerializer,
+    SinglePostSerializer,
+    FeedForSingleProfileSerializer,
+)
 from helenite_app.authentication import TokenAuthentication
 from helenite_app.permissions import TokenAgePermission
 
@@ -29,22 +35,24 @@ class LoginView(ObtainAuthToken):
     """
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        user = serializer.validated_data["user"]
         try:
             token = Token.objects.get(user=user)
             time_difference = timezone.now() - token.created
             token_valid_duration = timezone.timedelta(days=7)
-        
+
             if time_difference > token_valid_duration:
                 token.delete()
                 token = Token.objects.create(user=user)
-        
+
         except Token.DoesNotExist:
             token = Token.objects.create(user=user)
 
-        return Response({'token': token.key})
+        return Response({"token": token.key})
 
 
 class LogoutView(APIView):
@@ -57,25 +65,27 @@ class LogoutView(APIView):
     Endpoint URL: /api/v1/logout/
     HTTP Methods Allowed: POST
     """
+
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
     def post(self, request):
-        
         token = Token.objects.get(user=request.user)
         token.delete()
 
-        return Response({'message': 'Logout successfull.'}, status=status.HTTP_200_OK)
+        return Response({"message": "Logout successfull."}, status=status.HTTP_200_OK)
 
 
 class RegisterCreateAPIView(generics.CreateAPIView):
     """
     TODO: Add documentation.
     """
+
     pass
 
 
 class FeedListCreateAPIView(generics.ListCreateAPIView):
+    # TODO: Like a comment while on the feed.
     """
     API view to retrieve the feed for a given logged-in user, as well as to create
     a new post.
@@ -121,6 +131,31 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
 
 class DiscoverListAPIView(generics.ListAPIView):
     """
+    View dedicated to providing random posts from random users.
+
+    Inherits from DRF's ListAPIView to provide a list of up to 30 random posts to
+    the user so long as the post owner haven't made their profile private.
+
+    Endpoint URL: /api/v1/feed/discover/
+    HTTP Methods Allowed: GET
+    """
+
+    serializer_class = FeedSerializer
+    permission_classes = [IsAuthenticated, TokenAgePermission]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        queryset = Post.objects.filter(
+            Q(post_parent_user__profile__private_profile=False)
+            & ~Q(post_parent_user=user)
+        ).order_by("?")[:30]
+        return queryset
+
+
+class ProfileSearchListView(generics.GenericAPIView):
+    """
     TODO: Add documentation.
     """
     pass
@@ -128,22 +163,45 @@ class DiscoverListAPIView(generics.ListAPIView):
 
 class ProfileRetriveAPIView(generics.RetrieveAPIView):
     """
-    TODO: Add documentation.
+    View to retrieve a single profile based on the custom_slug_profile.
+
+    Inherits from DRF's RetrieveAPIView to provide a single profile alongside its
+    posts.
+
+    Endpoint URL: /api/v1/profile/<slug:custom_slug_profile>/
+    HTTP Methods Allowed: GET
     """
+
     lookup_field = "custom_slug_profile"
-    queryset = Profile.objects.all()
+    serializer_class = FeedForSingleProfileSerializer
+
+    def get_queryset(self):
+        queryset = Profile.objects.filter()
+        return queryset
 
 
 class ChangeSettingsUpdateAPIView(generics.UpdateAPIView):
     """
     TODO: Add documentation.
     """
+
     pass
 
 
 class PostRetriveAPIView(generics.RetrieveAPIView):
+    # TODO: Leave a new comment.
     """
-    TODO: Add documentation.
+    View to retrieve a single post based on the post_slug.
+
+    Inherits from DRF's RetrieveAPIView to provide a single post alongside its
+    likes, comments and counts for both.
+
+    Endpoint URL: /api/v1/profile/post/<slug:post_slug>/
+    HTTP Methods Allowed: GET
     """
+
     lookup_field = "post_slug"
-    queryset = Post.objects.all()
+    serializer_class = SinglePostSerializer
+    permission_classes = [IsAuthenticated, TokenAgePermission]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    queryset = Post.objects.filter()
