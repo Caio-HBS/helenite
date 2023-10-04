@@ -21,3 +21,15 @@ class TokenAgePermission(permissions.BasePermission):
                 return False
 
         return True
+
+
+class IsUserPermission(permissions.BasePermission):
+    """
+    Checks that a given object owner is the same as the current user.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_authenticated and request.user == obj.user:
+            return True
+        return False
+    

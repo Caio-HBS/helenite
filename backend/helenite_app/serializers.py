@@ -1,9 +1,14 @@
 from rest_framework import serializers
 
+from django.contrib.auth.models import User
+
 from helenite_app.models import Profile, Post, Like, Comment
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    """
+    TODO: Add documentation.
+    """
     user_pk = serializers.CharField(source="user.pk", read_only=True)
     username = serializers.CharField(source="user.username", read_only=True)
 
@@ -19,6 +24,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class FeedSerializer(serializers.ModelSerializer):
+    """
+    TODO: Add documentation.
+    """
     likes = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
@@ -51,6 +59,9 @@ class FeedSerializer(serializers.ModelSerializer):
 
 
 class FeedWithoutProfileInfoSerializer(FeedSerializer):
+    """
+    TODO: Add documentation.
+    """
     class Meta:
         model = Post
         fields = [
@@ -65,6 +76,9 @@ class FeedWithoutProfileInfoSerializer(FeedSerializer):
 
 
 class FeedForSingleProfileSerializer(ProfileSerializer):
+    """
+    TODO: Add documentation.
+    """
     posts = FeedWithoutProfileInfoSerializer(
         many=True, source="user.created_posts", read_only=True
     )
@@ -84,6 +98,9 @@ class FeedForSingleProfileSerializer(ProfileSerializer):
 
 
 class SinglePostSerializer(FeedSerializer):
+    """
+    TODO: Add documentation.
+    """
     comments = serializers.SerializerMethodField()
 
     class Meta:
@@ -101,10 +118,16 @@ class SinglePostSerializer(FeedSerializer):
 
 class NewCommentSerializer():
     # TODO: This.
+    """
+    TODO: Add documentation.
+    """
     pass
 
 
 class NewPostSerializer(serializers.ModelSerializer):
+    """
+    TODO: Add documentation.
+    """
     parent_user = serializers.CharField(source="post_parent_user", read_only=True)
 
     class Meta:
@@ -114,3 +137,36 @@ class NewPostSerializer(serializers.ModelSerializer):
             "post_text",
             "post_image",
         ]
+
+
+class SettingsSerializer(serializers.ModelSerializer):
+    """
+    TODO: Add documentation.
+    """
+    old_password = serializers.CharField(write_only=True, required=False)
+    new_password = serializers.CharField(write_only=True, required=False)
+    confirm_new_password = serializers.CharField(write_only=True, required=False,)
+
+    class Meta:
+        model = Profile
+        fields = [
+            "pfp",
+            "private_profile",
+            "show_birthday",
+            "old_password",
+            "new_password",
+            "confirm_new_password",
+        ]
+
+    def validate(self, data):
+        if data.get('new_password'):
+            if data.get('confirm_new_password') == None:
+                raise serializers.ValidationError("Confirmation password wasn't provided")
+            elif data.get('old_password') == None:
+                raise serializers.ValidationError("Old password wasn't provided")
+            elif data.get('new_password') != data.get('confirm_new_password'):
+                raise serializers.ValidationError("Unable to confirm new password. Are they the same?")
+            else:
+                # TODO: Add password verification.
+                pass
+        return data

@@ -18,9 +18,10 @@ from helenite_app.serializers import (
     NewPostSerializer,
     SinglePostSerializer,
     FeedForSingleProfileSerializer,
+    SettingsSerializer,
 )
 from helenite_app.authentication import TokenAuthentication
-from helenite_app.permissions import TokenAgePermission
+from helenite_app.permissions import TokenAgePermission, IsUserPermission
 
 
 class LoginView(ObtainAuthToken):
@@ -180,12 +181,48 @@ class ProfileRetriveAPIView(generics.RetrieveAPIView):
         return queryset
 
 
-class ChangeSettingsUpdateAPIView(generics.UpdateAPIView):
+class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
     """
-    TODO: Add documentation.
+    API view to retrieve and change user settings.
+
+    Inherits from DRF's RetrieveUpdateAPIView, providing an endpoint to fetch the
+    settings for a given profile, as well as a way to change them.
+
+    Endpoint URL: /api/v1/profile/<slug:custom_slug_profile>/change-settings/
+    HTTP Methods Allowed: GET, PATCH
     """
 
-    pass
+    permission_classes = [IsAuthenticated, IsUserPermission, TokenAgePermission]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    lookup_field = "custom_slug_profile"
+    serializer_class = SettingsSerializer
+    queryset = Profile.objects.filter()
+    http_method_names = ["get", "patch", "head", "options"]
+
+    def patch(self, request, custom_slug_profile):
+        profile = self.get_object()
+        serializer = self.get_serializer(profile, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            old_password = serializer.validated_data.get('old_password')
+            new_password = serializer.validated_data.get('new_password')
+            # User wants to change their password.
+            if old_password and new_password:
+                if request.user.check_password(old_password):
+                    request.user.set_password(new_password)
+                    request.user.save()
+                    token = Token.objects.get(user=request.user)
+                    token.delete()
+                    return Response({"detail": "Password changed successfully. Please log-in again."}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"detail": "Incorrect old password"}, status=status.HTTP_400_BAD_REQUEST)
+            # Changes in other settings.
+            serializer.save()
+
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 
 class PostRetriveAPIView(generics.RetrieveAPIView):
