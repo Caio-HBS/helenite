@@ -238,3 +238,34 @@ class SettingsSerializer(serializers.ModelSerializer):
                 # TODO: Add password verification.
                 pass
         return data
+
+
+class UserRegistrationSerializer(serializers.Serializer):
+    """
+    TODO: Add documentation.
+    """
+
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    confirmation_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    first_name = serializers.CharField(max_length=15)
+    last_name = serializers.CharField(max_length=15)
+    birthday = serializers.DateField()
+    birth_place = serializers.CharField(max_length=50)
+    show_birthday = serializers.BooleanField(default=True)
+    custom_slug_profile = serializers.SlugField(max_length=15, required=False)
+    private_profile = serializers.BooleanField(default=False)
+
+    def create(self, validated_data):
+        # Verifica se as senhas coincidem
+        password = validated_data.pop('password')
+        confirmation_password = validated_data.pop('confirmation_password')
+        if password != confirmation_password:
+            raise serializers.ValidationError("Passwords don't correspong")
+
+        user = User.objects.create_user(**validated_data)
+
+        Profile.objects.create(user=user, **validated_data)
+
+        return user
