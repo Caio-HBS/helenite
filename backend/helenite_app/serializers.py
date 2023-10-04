@@ -242,7 +242,20 @@ class SettingsSerializer(serializers.ModelSerializer):
 
 class UserRegistrationSerializer(serializers.Serializer):
     """
-    TODO: Add documentation.
+    This serializer is responsible for the registration of new users.
+
+    Fields:
+        - username: the username chosen by the user (unique);
+        - email: the email chosen by the user;
+        - password: the password chosen by the user;
+        - confirmation_password: confirmation for password;
+        - first_name: user's first name;
+        - last_name: user's last name;
+        - birthday: user's date of birth;
+        - birth_place: user's place of birth;
+        - show_birthday: hide or show birthday setting (boolean, default=True);
+        - custom_slug_profile: chosen slug for profile (not-required);
+        - private_profile: make the profile private setting (boolean; default=False).
     """
 
     username = serializers.CharField(max_length=150)
@@ -258,10 +271,8 @@ class UserRegistrationSerializer(serializers.Serializer):
     private_profile = serializers.BooleanField(default=False)
 
     def create(self, validated_data):
-        # Verifica se as senhas coincidem
-        password = validated_data.pop('password')
-        confirmation_password = validated_data.pop('confirmation_password')
-        if password != confirmation_password:
+        # TODO: add extra password validation.
+        if validated_data.get('password') != validated_data.get('confirmation_password'):
             raise serializers.ValidationError("Passwords don't correspong")
 
         user = User.objects.create_user(**validated_data)
