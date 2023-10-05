@@ -31,7 +31,9 @@ class Profile(models.Model):
     last_name = models.CharField(max_length=15, null=False, blank=False)
     birthday = models.DateField(null=False, blank=False)
     birth_place = models.CharField(max_length=50, null=False, blank=False)
-    custom_slug_profile = models.SlugField(max_length=15, unique=True, null=True, blank=True)
+    custom_slug_profile = models.SlugField(
+        max_length=15, unique=True, null=True, blank=True
+    )
     friends = models.ManyToManyField("self", blank=True)
     private_profile = models.BooleanField(default=False)
     show_birthday = models.BooleanField(default=True)
@@ -46,7 +48,13 @@ class Profile(models.Model):
         """
 
         if not self.custom_slug_profile:
-            self.custom_slug_profile = slugify(self.user.username)
+            try:
+                self.custom_slug_profile = slugify(self.user.username)
+            except:
+                self.custom_slug_profile = slugify(self.user.username) + "".join(
+                    random.SystemRandom().choice(string.ascii_uppercase + string.digits)
+                    for _ in range(5)
+                )
 
         if not self.pfp:
             self.pfp = "profile_pictures/default_pfp.png"
@@ -58,10 +66,10 @@ class Profile(models.Model):
         """
 
         return f"{self.first_name} {self.last_name}"
-    
+
     def get_absolute_url(self):
         return f"{reverse('profile_info_endpoint', kwargs={'custom_slug_profile': self.custom_slug_profile})}"
-    
+
     @property
     def endpoint(self):
         return self.get_absolute_url()
@@ -92,15 +100,17 @@ class Post(models.Model):
     )
 
     def get_absolute_url(self):
-        return f"{reverse('single_post_endpoint', kwargs={'post_slug': self.post_slug})}"
-    
+        return (
+            f"{reverse('single_post_endpoint', kwargs={'post_slug': self.post_slug})}"
+        )
+
     @property
     def endpoint(self):
         return self.get_absolute_url()
 
     def __str__(self):
         return f"{self.post_text[:16]}... - by {self.post_parent_user.username}"
-    
+
     def clean(self):
         """
         Prevents the user from creating a post with no image and no text.
@@ -111,7 +121,7 @@ class Post(models.Model):
     def save(self, **kwargs):
         """
         Provides an automatic slug generator for posts based on username and
-        random string, as well as guarantees that either an image or a text is 
+        random string, as well as guarantees that either an image or a text is
         present on the instance before saving
         """
 
@@ -168,7 +178,7 @@ class Comment(models.Model):
     def save(self, **kwargs):
         if not self.comment_text:
             raise ValidationError("You can't create a comment with no text.")
-        
+
         super().save(**kwargs)
 
     def __str__(self):

@@ -273,10 +273,18 @@ class UserRegistrationSerializer(serializers.Serializer):
     def create(self, validated_data):
         # TODO: add extra password validation.
         if validated_data.get('password') != validated_data.get('confirmation_password'):
-            raise serializers.ValidationError("Passwords don't correspong")
+            raise serializers.ValidationError("Passwords don't correspond.")
+        
+        validated_for_user = {}
+        validated_for_user["username"] = validated_data.get("username")
+        validated_for_user["email"] = validated_data.get("email")
+        validated_for_user["password"] = validated_data.get("password")
+        new_user = User.objects.create_user(**validated_for_user)
 
-        user = User.objects.create_user(**validated_data)
+        validated_data.pop("username")
+        validated_data.pop("email")
+        validated_data.pop("password")
+        validated_data.pop("confirmation_password")
+        Profile.objects.create(user=new_user, **validated_data)
 
-        Profile.objects.create(user=user, **validated_data)
-
-        return user
+        return new_user

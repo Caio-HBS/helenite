@@ -1,7 +1,6 @@
 from django.utils import timezone
 
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 from rest_framework import generics, serializers, status
@@ -19,6 +18,7 @@ from helenite_app.serializers import (
     SinglePostSerializer,
     FeedForSingleProfileSerializer,
     SettingsSerializer,
+    UserRegistrationSerializer,
 )
 from helenite_app.authentication import TokenAuthentication
 from helenite_app.permissions import TokenAgePermission, IsUserPermission
@@ -58,7 +58,7 @@ class LoginView(ObtainAuthToken):
 
 class LogoutView(APIView):
     """
-    View dedicated to loggin out user.
+    View dedicated to log out the user.
 
     Inherits from DRF's APIView to provide a way to both logout from the current
     sessions, as well as delete the current token.
@@ -79,14 +79,33 @@ class LogoutView(APIView):
 
 class RegisterCreateAPIView(generics.CreateAPIView):
     """
-    TODO: Add documentation.
+    View dedicated to the registration of new users.
+
+    Inherits from DRF's CreateAPIView to provide a way to create a new account.
+
+    Endpoint URL: /api/v1/register/
+    HTTP Methods Allowed: POST
     """
 
-    pass
+    serializer_class = UserRegistrationSerializer
+    http_method_names = ["post", "options"]
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"detail": "Account created successfully. Please log-in."},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response({"detail": "Invalid data."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FeedListCreateAPIView(generics.ListCreateAPIView):
-    # TODO: Like a comment while on the feed.
+    # TODO: Like a post while on the feed.
     """
     API view to retrieve the feed for a given logged-in user, as well as to create
     a new post.
@@ -156,6 +175,7 @@ class DiscoverListAPIView(generics.ListAPIView):
 
 
 class ProfileSearchListView(generics.GenericAPIView):
+    # TODO: Algolia integration.
     """
     TODO: Add documentation.
     """
@@ -204,8 +224,8 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
         serializer = self.get_serializer(profile, data=request.data, partial=True)
 
         if serializer.is_valid():
-            old_password = serializer.validated_data.get('old_password')
-            new_password = serializer.validated_data.get('new_password')
+            old_password = serializer.validated_data.get("old_password")
+            new_password = serializer.validated_data.get("new_password")
             # User wants to change their password.
             if old_password and new_password:
                 if request.user.check_password(old_password):
@@ -213,16 +233,23 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
                     request.user.save()
                     token = Token.objects.get(user=request.user)
                     token.delete()
-                    return Response({"detail": "Password changed successfully. Please log-in again."}, status=status.HTTP_200_OK)
+                    return Response(
+                        {
+                            "detail": "Password changed successfully. Please log-in again."
+                        },
+                        status=status.HTTP_200_OK,
+                    )
                 else:
-                    return Response({"detail": "Incorrect old password"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {"detail": "Incorrect old password"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             # Changes in other settings.
             serializer.save()
 
             return Response(serializer.data)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
 
 class PostRetriveAPIView(generics.RetrieveAPIView):
