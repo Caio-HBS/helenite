@@ -1,8 +1,11 @@
 import pytest
 
+from django.utils import timezone
 from django.contrib.auth.models import User
 
-from helenite_app.models import Profile
+from rest_framework.authtoken.models import Token
+
+from helenite_app.models import Profile, Post
 
 
 @pytest.fixture
@@ -60,3 +63,13 @@ def valid_data_for_comment(db, create_new_user):
         "comment_text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         "comment_publication_date": "2001-01-01 00:00:00",
     }
+
+
+@pytest.fixture
+def user_and_token(create_new_user):
+    """
+    Provides a new user and a token alongside it.
+    """
+
+    token = Token.objects.create(user=create_new_user, created=timezone.now() - timezone.timedelta(days=6))
+    return create_new_user, token
