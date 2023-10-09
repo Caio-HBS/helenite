@@ -19,6 +19,7 @@ from helenite_app.serializers import (
     FeedForSingleProfileSerializer,
     SettingsSerializer,
     UserRegistrationSerializer,
+    NewCommentSerializer,
 )
 from helenite_app.authentication import TokenAuthentication
 from helenite_app.permissions import TokenAgePermission, IsUserPermission
@@ -252,20 +253,68 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PostRetriveAPIView(generics.RetrieveAPIView):
-    # TODO: Leave a new comment.
+class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
     """
-    View to retrieve a single post based on the post_slug.
+    View to retrieve a single post based on the post_slug. Also allows for commenting
+    and deleting the post.
 
     Inherits from DRF's RetrieveAPIView to provide a single post alongside its
-    likes, comments and counts for both.
+    likes, comments and counts for both. Depending on the HTTP method and permissions,
+    also allows deleting.
 
     Endpoint URL: /api/v1/profile/post/<slug:post_slug>/
-    HTTP Methods Allowed: GET
+    HTTP Methods Allowed: GET, POST, DELETE
     """
 
-    lookup_field = "post_slug"
-    serializer_class = SinglePostSerializer
-    permission_classes = [IsAuthenticated, TokenAgePermission]
     authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated, TokenAgePermission]
     queryset = Post.objects.filter()
+    lookup_field = "post_slug"
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return NewCommentSerializer
+        return SinglePostSerializer
+
+    def create_comment(self, request, post):
+        serializer = NewCommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(comment_parent_post=post, comment_user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete_post(self, request, post):
+        if post.post_parent_user == request.user:
+            post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": "You don't have permission to delete that post."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    def get(self, request, post_slug):
+        post = self.get_object()
+        return Response(self.get_serializer(post).data)
+
+    def post(self, request, post_slug):
+        data = request.data
+        serializer = NewCommentSerializer(data=data)
+        post = self.get_object()
+
+        if serializer.is_valid():
+            serializer.save(comment_parent_post=post, comment_user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, post_slug):
+        post = self.get_object()
+        if request.user == post.post_parent_user:
+            self.delete_post(request, post)
+            return Response(
+                {"detail": "Your post was successfully deleted."},
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"detail": "You don't have permission to delete that post."},
+            status=status.HTTP_403_FORBIDDEN,
+        )

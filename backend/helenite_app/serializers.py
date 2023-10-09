@@ -155,18 +155,28 @@ class SinglePostSerializer(FeedSerializer):
     def get_comments(self, obj):
         comments = Comment.objects.filter(comment_parent_post=obj)
         comment_data = [
-            {"text": comment.comment_text, "author": comment.comment_user.username}
+            {"comment_text": comment.comment_text, "comment_user": comment.comment_user.username}
             for comment in comments
         ]
         return comment_data
 
 
-class NewCommentSerializer:
-    # TODO: This.
+class NewCommentSerializer(serializers.ModelSerializer):
     """
-    TODO: Add documentation.
+    This serializer is responsible for a way to comment on a post.
+    Fields:
+        - comment_text: the text of the comment(may not be blank).
     """
-    pass
+    class Meta:
+        model = Comment
+        fields = [
+            'comment_text', 
+        ]
+
+    def validate_comment_text(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Text commend can't be blank.")
+        return value
 
 
 class NewPostSerializer(serializers.ModelSerializer):
