@@ -1,4 +1,5 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
+from rest_framework.response import Response
 
 from django.contrib.auth.models import User
 
@@ -155,7 +156,10 @@ class SinglePostSerializer(FeedSerializer):
     def get_comments(self, obj):
         comments = Comment.objects.filter(comment_parent_post=obj)
         comment_data = [
-            {"comment_text": comment.comment_text, "comment_user": comment.comment_user.username}
+            {
+                "comment_text": comment.comment_text,
+                "comment_user": comment.comment_user.username,
+            }
             for comment in comments
         ]
         return comment_data
@@ -167,10 +171,11 @@ class NewCommentSerializer(serializers.ModelSerializer):
     Fields:
         - comment_text: the text of the comment(may not be blank).
     """
+
     class Meta:
         model = Comment
         fields = [
-            'comment_text', 
+            "comment_text",
         ]
 
     def validate_comment_text(self, value):
@@ -270,8 +275,10 @@ class UserRegistrationSerializer(serializers.Serializer):
 
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
-    confirmation_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    password = serializers.CharField(write_only=True, style={"input_type": "password"})
+    confirmation_password = serializers.CharField(
+        write_only=True, style={"input_type": "password"}
+    )
     first_name = serializers.CharField(max_length=15)
     last_name = serializers.CharField(max_length=15)
     birthday = serializers.DateField()
@@ -282,9 +289,11 @@ class UserRegistrationSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         # TODO: add extra password validation.
-        if validated_data.get('password') != validated_data.get('confirmation_password'):
+        if validated_data.get("password") != validated_data.get(
+            "confirmation_password"
+        ):
             raise serializers.ValidationError("Passwords don't correspond.")
-        
+
         validated_for_user = {}
         validated_for_user["username"] = validated_data.get("username")
         validated_for_user["email"] = validated_data.get("email")
@@ -298,7 +307,7 @@ class UserRegistrationSerializer(serializers.Serializer):
         Profile.objects.create(user=new_user, **validated_data)
 
         return new_user
-    
+
 
 class LikeSerializer(serializers.ModelSerializer):
     """
@@ -308,26 +317,22 @@ class LikeSerializer(serializers.ModelSerializer):
         - like_owner: the `user` that owns the like;
         - like_parent_post_slug: the slug from the post being liked.
     """
-    like_parent_post_slug = serializers.SlugField()#source="like_parent_post.post_slug")
 
     class Meta:
         model = Like
-        fields = [
-            "like_owner",
-            "like_parent_post_slug"
-        ]
-
-    def validate(self, data):
-        get_post = Post.objects.get(post_slug=data.get("like_parent_post_slug"))
-
-        if Like.objects.filter(like_owner=data["like_owner"], like_parent_post=get_post).exists():
-            raise serializers.ValidationError("You have already liked this post.")
-        return data
+        fields = ["like_owner", "like_parent_post"]
 
     def create(self, validated_data):
-        get_post = Post.objects.get(post_slug=validated_data["like_parent_post_slug"])
-        validated_data.pop("like_parent_post_slug")
-        like = Like.objects.create(**validated_data, like_parent_post=get_post)
-        like.save()
+        like_owner = self.context["request"].user
+        like_parent_post_slug = self.context["view"].kwargs.get("post_slug")
 
-        return like
+        try:
+            post = Post.objects.get(post_slug=like_parent_post_slug)
+            like, created = Like.objects.get_or_create(
+                like_owner=like_owner, like_parent_post=post
+            )
+            if not created:
+                like.delete()
+            return like
+        except Post.DoesNotExist:
+            raise serializers.ValidationError("Unable to find post.")

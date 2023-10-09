@@ -120,7 +120,7 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticated, TokenAgePermission]
     authentication_classes = [TokenAuthentication, SessionAuthentication]
-    
+
     def get_serializer_class(self):
         if self.request.method == "POST":
             return NewPostSerializer
@@ -153,13 +153,29 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
 
     def put(self, request, *args, **kwargs):
         serializer_class = self.get_serializer_class()
-        request.data["like_owner"] = request.user.id
-        serializer = serializer_class(data=request.data)
+        post_slug = request.data.get("post_slug")
+        like_owner = request.user
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"detail": "Successfully liked post."}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            post = Post.objects.get(post_slug=post_slug)
+        except Post.DoesNotExist:
+            return Response(
+                {"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        like, created = Like.objects.get_or_create(
+            like_owner=like_owner, like_parent_post=post
+        )
+
+        if not created:
+            like.delete()
+            return Response(
+                {"detail": "Successfully unliked post."}, status=status.HTTP_200_OK
+            )
+
+        return Response(
+            {"detail": "Successfully liked post."}, status=status.HTTP_201_CREATED
+        )
 
 
 class DiscoverListAPIView(generics.ListAPIView):
@@ -266,7 +282,7 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
 
 
 class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
-    #TODO: Like a post here too.
+    # TODO: Like a post here too.
     """
     View to retrieve a single post based on the post_slug. Also allows for commenting
     and deleting the post.
