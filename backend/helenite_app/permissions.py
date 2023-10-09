@@ -33,3 +33,13 @@ class IsUserPermission(permissions.BasePermission):
             return True
         return False
     
+
+class IsPostOwnerPermission(permissions.BasePermission):
+    """
+    Checks that a post belongs to the current user or not.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_authenticated and request.user == obj.post_parent_user:
+            return True
+        return False
