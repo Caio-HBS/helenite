@@ -10,7 +10,7 @@ Helenite is a social media built as an exercise of fullstack development. Comple
 
 ## License
 
-This project ins licensed under the MIT License.
+This project is licensed under the MIT License.
 
 ## Goals
 With this project, my goals were to improve my abilities as a programmer, especifically with CI/CD workflows, but also learn the basic for Javascript UI development in React.
