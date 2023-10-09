@@ -20,6 +20,7 @@ from helenite_app.serializers import (
     SettingsSerializer,
     UserRegistrationSerializer,
     NewCommentSerializer,
+    LikeSerializer,
 )
 from helenite_app.authentication import TokenAuthentication
 from helenite_app.permissions import TokenAgePermission, IsUserPermission
@@ -106,7 +107,6 @@ class RegisterCreateAPIView(generics.CreateAPIView):
 
 
 class FeedListCreateAPIView(generics.ListCreateAPIView):
-    # TODO: Like a post while on the feed.
     """
     API view to retrieve the feed for a given logged-in user, as well as to create
     a new post.
@@ -115,15 +115,17 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
     of posts from friends and the user themselves.
 
     Endpoint URL: /api/v1/feed/
-    HTTP Methods Allowed: GET, POST
+    HTTP Methods Allowed: GET, POST, PUT
     """
 
     permission_classes = [IsAuthenticated, TokenAgePermission]
     authentication_classes = [TokenAuthentication, SessionAuthentication]
-
+    
     def get_serializer_class(self):
         if self.request.method == "POST":
             return NewPostSerializer
+        elif self.request.method == "PUT":
+            return LikeSerializer
         return FeedSerializer
 
     def get_queryset(self):
@@ -148,6 +150,16 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
 
         serializer.is_valid(raise_exception=True)
         serializer.save(post_parent_user=get_user)
+
+    def put(self, request, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        request.data["like_owner"] = request.user.id
+        serializer = serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"detail": "Successfully liked post."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DiscoverListAPIView(generics.ListAPIView):
@@ -254,6 +266,7 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
 
 
 class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
+    #TODO: Like a post here too.
     """
     View to retrieve a single post based on the post_slug. Also allows for commenting
     and deleting the post.

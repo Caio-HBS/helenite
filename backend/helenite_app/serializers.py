@@ -298,3 +298,36 @@ class UserRegistrationSerializer(serializers.Serializer):
         Profile.objects.create(user=new_user, **validated_data)
 
         return new_user
+    
+
+class LikeSerializer(serializers.ModelSerializer):
+    """
+    This serializer is responsible for liking a post.
+
+    Fields:
+        - like_owner: the `user` that owns the like;
+        - like_parent_post_slug: the slug from the post being liked.
+    """
+    like_parent_post_slug = serializers.SlugField()#source="like_parent_post.post_slug")
+
+    class Meta:
+        model = Like
+        fields = [
+            "like_owner",
+            "like_parent_post_slug"
+        ]
+
+    def validate(self, data):
+        get_post = Post.objects.get(post_slug=data.get("like_parent_post_slug"))
+
+        if Like.objects.filter(like_owner=data["like_owner"], like_parent_post=get_post).exists():
+            raise serializers.ValidationError("You have already liked this post.")
+        return data
+
+    def create(self, validated_data):
+        get_post = Post.objects.get(post_slug=validated_data["like_parent_post_slug"])
+        validated_data.pop("like_parent_post_slug")
+        like = Like.objects.create(**validated_data, like_parent_post=get_post)
+        like.save()
+
+        return like
