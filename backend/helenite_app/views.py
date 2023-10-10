@@ -205,21 +205,56 @@ class DiscoverListAPIView(generics.ListAPIView):
 
 class SearchListView(generics.GenericAPIView):
     # TODO: Algolia LOGO.
-    # TODO: Algolia integration.
     """
-    TODO: Add documentation.
+    View dedicated to search both the `Profile` as well as the `Post` indexes.
+
+    Inherits from DRF's GenericAPIView to provide a list of up profiles and/or
+    posts that match the query provided by the user through the use of the Algolia
+    search engine.
+
+    Endpoint URL: /api/v1/search/?q=query+parameters
+    HTTP Methods Allowed: GET
     """
     
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated, TokenAgePermission]
     authentication_classes = [TokenAuthentication, SessionAuthentication]
 
+    def algolia_search(self, query):
+        results_from_algolia = client.perform_search(query)
+
+        profile_slugs = []
+        post_slugs = []
+
+        if results_from_algolia.get("results") != []:
+            for result in results_from_algolia["results"]:
+                index = result.get("index")
+                for hit in result["hits"]:
+                    if index == "Helenite_Profile":               
+                        profile_slugs.append(hit["endpoint"].split("/")[-2])
+                    elif index == "Helenite_Post":
+                        post_slugs.append(hit["endpoint"].split("/")[-2])
+                
+
+        slugs = {
+            "profiles": profile_slugs,
+            "posts": post_slugs
+        }
+        
+        if slugs["posts"] == [] and slugs["profiles"] == []:
+            return None
+        
+        return slugs
+
     def get(self, request, *args, **kwargs):
         query = request.GET.get('q')
         if not query:
             return Response({"detail": "Query cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
-        results = client.perform_search(query)
-        return Response(results)
+        search_results = self.algolia_search(query)
+        
+        if search_results is None:
+            return Response({"detail": "Sorry, we couldn't find any matches."}, status=status.HTTP_204_NO_CONTENT)
+
 
 class ProfileRetriveAPIView(generics.RetrieveAPIView):
     """

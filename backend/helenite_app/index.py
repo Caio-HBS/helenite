@@ -9,9 +9,10 @@ class ProfileIndex(AlgoliaIndex):
     should_index = "is_public"
     fields = [
         "user", 
-        "custom_slug_profile", 
+        "custom_slug_profile",
         "first_name", 
-        "last_name"
+        "last_name",
+        "endpoint"
     ]
 
 
@@ -21,6 +22,5 @@ class PostIndex(AlgoliaIndex):
     fields = [
         "post_parent_user",
         "post_text",
-        "post_image",
         "endpoint"
     ]
