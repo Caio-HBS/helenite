@@ -6,10 +6,13 @@ from django.contrib.auth.models import User
 from rest_framework import generics, serializers, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+
+from helenite_app import client
 
 from helenite_app.models import Profile, Post, Like, Comment
 from helenite_app.serializers import (
@@ -200,13 +203,23 @@ class DiscoverListAPIView(generics.ListAPIView):
         return queryset
 
 
-class ProfileSearchListView(generics.GenericAPIView):
+class SearchListView(generics.GenericAPIView):
+    # TODO: Algolia LOGO.
     # TODO: Algolia integration.
     """
     TODO: Add documentation.
     """
-    pass
+    
+    renderer_classes = [JSONRenderer]
+    permission_classes = [IsAuthenticated, TokenAgePermission]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
 
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get('q')
+        if not query:
+            return Response({"detail": "Query cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+        results = client.perform_search(query)
+        return Response(results)
 
 class ProfileRetriveAPIView(generics.RetrieveAPIView):
     """

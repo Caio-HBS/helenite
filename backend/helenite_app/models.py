@@ -60,6 +60,9 @@ class Profile(models.Model):
             self.pfp = "profile_pictures/default_pfp.png"
         super().save(**kwargs)
 
+    def is_public(self) -> bool:
+        return not self.private_profile
+
     def get_full_name(self):
         """
         Returns the full name associated with the profile.
@@ -107,6 +110,9 @@ class Post(models.Model):
     @property
     def endpoint(self):
         return self.get_absolute_url()
+    
+    def is_public(self) -> bool:
+        return not self.post_parent_user.profile.private_profile
 
     def __str__(self):
         return f"{self.post_text[:16]}... - by {self.post_parent_user.username}"

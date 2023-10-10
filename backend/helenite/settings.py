@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     # Django REST Framework
     'rest_framework',
     'rest_framework.authtoken',
+    # Third party API services
+    'algoliasearch_django',
 ]
 
 MIDDLEWARE = [
@@ -145,4 +147,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
+}
+
+ALGOLIA = {
+    'APPLICATION_ID': os.environ.get('ALGOLIA_APPLICATION_ID'),
+    'API_KEY': os.environ.get('ALGOLIA_API_KEY'),
+    'INDEX_PREFIX': 'Helenite'
 }
