@@ -20,7 +20,6 @@ from helenite_app.serializers import (
     SettingsSerializer,
     UserRegistrationSerializer,
     NewCommentSerializer,
-    LikeSerializer,
 )
 from helenite_app.authentication import TokenAuthentication
 from helenite_app.permissions import TokenAgePermission, IsUserPermission
@@ -124,8 +123,6 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
     def get_serializer_class(self):
         if self.request.method == "POST":
             return NewPostSerializer
-        elif self.request.method == "PUT":
-            return LikeSerializer
         return FeedSerializer
 
     def get_queryset(self):
@@ -238,7 +235,7 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
     settings for a given profile, as well as a way to change them.
 
     Endpoint URL: /api/v1/profile/<slug:custom_slug_profile>/change-settings/
-    HTTP Methods Allowed: GET, PATCH
+    HTTP Methods Allowed: GET, PATCH, DELETE
     """
 
     permission_classes = [IsAuthenticated, IsUserPermission, TokenAgePermission]
@@ -246,7 +243,7 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
     lookup_field = "custom_slug_profile"
     serializer_class = SettingsSerializer
     queryset = Profile.objects.filter()
-    http_method_names = ["get", "patch", "head", "options"]
+    http_method_names = ["get", "patch", "delete", "head", "options"]
 
     def patch(self, request, custom_slug_profile):
         profile = self.get_object()
@@ -279,6 +276,21 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, custom_slug_profile):
+        profile = self.get_object()
+        if request.user == profile.user:
+            found_user = User.objects.get(username=profile.user.username)
+            found_user.delete()
+            return Response(
+                        {"detail": "Accound successfully deleted."},
+                        status=status.HTTP_200_OK,
+                    )
+        
+        return Response(
+            {"detail": "You don't have permission to perform that action."}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
 
 class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
@@ -292,7 +304,7 @@ class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
     also allows deleting.
 
     Endpoint URL: /api/v1/profile/post/<slug:post_slug>/
-    HTTP Methods Allowed: GET, POST, DELETE
+    HTTP Methods Allowed: GET, POST, PUT, DELETE
     """
 
     authentication_classes = [TokenAuthentication, SessionAuthentication]
@@ -346,4 +358,30 @@ class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
         return Response(
             {"detail": "You don't have permission to delete that post."},
             status=status.HTTP_403_FORBIDDEN,
+        )
+    
+    def put(self, request, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        post_slug = request.data.get("post_slug")
+        like_owner = request.user
+
+        try:
+            post = Post.objects.get(post_slug=post_slug)
+        except Post.DoesNotExist:
+            return Response(
+                {"detail": "Post not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        like, created = Like.objects.get_or_create(
+            like_owner=like_owner, like_parent_post=post
+        )
+
+        if not created:
+            like.delete()
+            return Response(
+                {"detail": "Successfully unliked post."}, status=status.HTTP_200_OK
+            )
+
+        return Response(
+            {"detail": "Successfully liked post."}, status=status.HTTP_201_CREATED
         )

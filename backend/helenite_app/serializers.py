@@ -307,32 +307,3 @@ class UserRegistrationSerializer(serializers.Serializer):
         Profile.objects.create(user=new_user, **validated_data)
 
         return new_user
-
-
-class LikeSerializer(serializers.ModelSerializer):
-    """
-    This serializer is responsible for liking a post.
-
-    Fields:
-        - like_owner: the `user` that owns the like;
-        - like_parent_post_slug: the slug from the post being liked.
-    """
-
-    class Meta:
-        model = Like
-        fields = ["like_owner", "like_parent_post"]
-
-    def create(self, validated_data):
-        like_owner = self.context["request"].user
-        like_parent_post_slug = self.context["view"].kwargs.get("post_slug")
-
-        try:
-            post = Post.objects.get(post_slug=like_parent_post_slug)
-            like, created = Like.objects.get_or_create(
-                like_owner=like_owner, like_parent_post=post
-            )
-            if not created:
-                like.delete()
-            return like
-        except Post.DoesNotExist:
-            raise serializers.ValidationError("Unable to find post.")
