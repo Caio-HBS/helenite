@@ -11,7 +11,7 @@ def get_index(index_name):
     return index
 
 
-def perform_search(query, index, **kwargs):
+def perform_search(query, index="Helenite_Profile", **kwargs):
     index = get_index(index)
     results = index.search(query)
     return results

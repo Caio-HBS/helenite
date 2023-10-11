@@ -209,48 +209,58 @@ class SearchListView(generics.ListAPIView):
     """
     View dedicated to search both the `Profile` as well as the `Post` indexes.
 
-    Inherits from DRF's ListAPIView to provide a list of profiles or posts that 
+    Inherits from DRF's ListAPIView to provide a list of profiles or posts that
     match the query and the index provided by the user through the use of the Algolia
     search engine.
 
     Endpoint URL: /api/v1/search/?q=query+parameters&index=index
     HTTP Methods Allowed: GET
     """
-    
+
+    serializer_class = ProfileSearchSerializer
     permission_classes = [IsAuthenticated, TokenAgePermission]
     authentication_classes = [TokenAuthentication, SessionAuthentication]
 
     def get_queryset(self):
         query = self.request.GET.get("q")
-        index = self.request.GET.get("index")
+        index = self.request.GET.get("index", "Helenite_Profile")
 
         if not query or query == "":
-            return Response({"detail": "Query cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Query cannot be empty."}, status=status.HTTP_400_BAD_REQUEST
+            )
         if not index or index == "":
-            return Response({"detail": "Index cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Index cannot be empty."}, status=status.HTTP_400_BAD_REQUEST
+            )
         if index != "Helenite_Profile" and index != "Helenite_Post":
-            return Response({"detail": "Invalid index."}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(
+                {"detail": "Invalid index."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         results_from_algolia = client.perform_search(query, index)
-        
+
+        if results_from_algolia["hits"] == []:
+            return None
+
         slugs = []
         for hit in results_from_algolia["hits"]:
             endpoint = hit["endpoint"]
             slug = endpoint.split("/")[-2]
             slugs.append(slug)
-        
+
         queryset = Profile.objects.filter(custom_slug_profile__in=slugs)
         return queryset
-    
-    def get_serializer_class(self, *args, **kwargs):
-        return ProfileSearchSerializer
 
     def get(self, request, *args, **kwargs):
         search_results = self.get_queryset()
-        
+
         if search_results is None:
-            return Response({"detail": "Sorry, we couldn't find any matches."}, status=status.HTTP_204_NO_CONTENT)
-        
+            return Response(
+                {"detail": "Sorry, we couldn't find any matches."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+
         return Response(self.get_serializer(search_results, many=True).data)
 
 
@@ -322,20 +332,20 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
             return Response(serializer.data)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def delete(self, request, custom_slug_profile):
         profile = self.get_object()
         if request.user == profile.user:
             found_user = User.objects.get(username=profile.user.username)
             found_user.delete()
             return Response(
-                        {"detail": "Accound successfully deleted."},
-                        status=status.HTTP_200_OK,
-                    )
-        
+                {"detail": "Accound successfully deleted."},
+                status=status.HTTP_200_OK,
+            )
+
         return Response(
-            {"detail": "You don't have permission to perform that action."}, 
-            status=status.HTTP_401_UNAUTHORIZED
+            {"detail": "You don't have permission to perform that action."},
+            status=status.HTTP_401_UNAUTHORIZED,
         )
 
 
@@ -404,7 +414,7 @@ class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
             {"detail": "You don't have permission to delete that post."},
             status=status.HTTP_403_FORBIDDEN,
         )
-    
+
     def put(self, request, *args, **kwargs):
         serializer_class = self.get_serializer_class()
         post_slug = request.data.get("post_slug")
