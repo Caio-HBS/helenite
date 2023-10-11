@@ -307,15 +307,21 @@ class UserRegistrationSerializer(serializers.Serializer):
         Profile.objects.create(user=new_user, **validated_data)
 
         return new_user
-    
+
 
 class ProfileSearchSerializer(serializers.ModelSerializer):
+    """
+    This serializer is responsible for displaying the results of a search on profiles.
+
+    Fields:
+        - username: the username chosen by the user (unique);
+        - pfp: the user's profile picture;
+        - endpoint: the url for that user's profile;
+        - get_full_name: the user's full name.
+    """
+
     username = serializers.CharField(source="user.username")
+
     class Meta:
         model = Profile
-        fields = [
-            "username",
-            "pfp",
-            "endpoint",
-            "get_full_name"
-        ]
+        fields = ["username", "pfp", "endpoint", "get_full_name"]

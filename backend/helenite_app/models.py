@@ -61,6 +61,11 @@ class Profile(models.Model):
         super().save(**kwargs)
 
     def is_public(self) -> bool:
+        """
+        Returns the opposite of "private_profile" for Algolia search engine 
+        purposes.
+        """
+
         return not self.private_profile
 
     def get_full_name(self):
@@ -71,10 +76,18 @@ class Profile(models.Model):
         return f"{self.first_name} {self.last_name}"
 
     def get_absolute_url(self):
+        """
+        Returns the absolute URL for the endpoint property.
+        """
+
         return f"{reverse('profile_info_endpoint', kwargs={'custom_slug_profile': self.custom_slug_profile})}"
 
     @property
     def endpoint(self):
+        """
+        Returns the absolute URL for the endpoint for the serializer.
+        """
+
         return self.get_absolute_url()
 
 
@@ -102,18 +115,6 @@ class Post(models.Model):
         User, through="Like", related_name="liked_posts"
     )
 
-    def get_absolute_url(self):
-        return (
-            f"{reverse('single_post_endpoint', kwargs={'post_slug': self.post_slug})}"
-        )
-
-    @property
-    def endpoint(self):
-        return self.get_absolute_url()
-    
-    def is_public(self) -> bool:
-        return not self.post_parent_user.profile.private_profile
-
     def __str__(self):
         return f"{self.post_text[:16]}... - by {self.post_parent_user.username}"
 
@@ -140,6 +141,31 @@ class Post(models.Model):
                 for _ in range(14)
             )
         super().save(**kwargs)
+
+    def get_absolute_url(self):
+        """
+        Returns the absolute URL for the endpoint property.
+        """
+
+        return (
+            f"{reverse('single_post_endpoint', kwargs={'post_slug': self.post_slug})}"
+        )
+
+    @property
+    def endpoint(self):
+        """
+        Returns the absolute URL for the endpoint for the serializer.
+        """
+
+        return self.get_absolute_url()
+    
+    def is_public(self) -> bool:
+        """
+        Returns the opposite of "private_profile" for Algolia search engine 
+        purposes.
+        """
+
+        return not self.post_parent_user.profile.private_profile
 
 
 class Like(models.Model):
@@ -180,12 +206,12 @@ class Comment(models.Model):
     comment_parent_post = models.ForeignKey(Post, on_delete=models.CASCADE)
     comment_text = models.TextField(max_length=500, null=False, blank=False)
     comment_publication_date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.comment_text[:16]}... - by: {self.comment_user.username}, in {self.comment_parent_post.post_parent_user.username}"
 
     def save(self, **kwargs):
         if not self.comment_text:
             raise ValidationError("You can't create a comment with no text.")
 
         super().save(**kwargs)
-
-    def __str__(self):
-        return f"{self.comment_text[:16]}... - by: {self.comment_user.username}, in {self.comment_parent_post.post_parent_user.username}"
