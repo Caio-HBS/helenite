@@ -92,11 +92,14 @@ def test_endpoint_property_for_profile(db, valid_data_for_user_and_profile) -> N
     assert new_profile.endpoint == "/api/v1/profile/test/"
 
 
-def test_generic_create_post(db, valid_data_for_post) -> None:
+def test_generic_create_post(
+    db, create_new_user_and_profile, valid_data_for_post
+) -> None:
     """
     Tests that a new post can be created successfully.
     """
 
+    valid_data_for_post["post_parent_user"] = create_new_user_and_profile[0]
     Post.objects.create(**valid_data_for_post)
 
     assert Post.objects.count() == 1
@@ -115,12 +118,15 @@ def test_create_post_no_image_no_text(db, valid_data_for_post) -> None:
         Post.objects.create(**valid_data_for_post)
 
 
-def test_create_post_no_slug(db, valid_data_for_post) -> None:
+def test_create_post_no_slug(
+    db, create_new_user_and_profile, valid_data_for_post
+) -> None:
     """
     Tests the functionallity of automatically assigning a random slug to a newly
     created post.
     """
 
+    valid_data_for_post["post_parent_user"] = create_new_user_and_profile[0]
     valid_data_for_post.pop("post_slug")
 
     new_post = Post.objects.create(**valid_data_for_post)
@@ -129,11 +135,14 @@ def test_create_post_no_slug(db, valid_data_for_post) -> None:
     assert new_post.post_slug is not None
 
 
-def test_create_post_same_slug(db, valid_data_for_post) -> None:
+def test_create_post_same_slug(
+    db, create_new_user_and_profile, valid_data_for_post
+) -> None:
     """
     Tests that two posts can't share a same slug.
     """
 
+    valid_data_for_post["post_parent_user"] = create_new_user_and_profile[0]
     valid_data_for_post.pop("post_slug")
     new_post = Post.objects.create(**valid_data_for_post)
     new_post_slug = new_post.post_slug
@@ -143,10 +152,14 @@ def test_create_post_same_slug(db, valid_data_for_post) -> None:
         Post.objects.create(**valid_data_for_post)
 
 
-def test_endpoint_property_for_post(db, valid_data_for_post) -> None:
+def test_endpoint_property_for_post(
+    db, create_new_user_and_profile, valid_data_for_post
+) -> None:
     """
     Tests that two posts can't share a same slug.
     """
+
+    valid_data_for_post["post_parent_user"] = create_new_user_and_profile[0]
 
     new_post = Post.objects.create(**valid_data_for_post)
 

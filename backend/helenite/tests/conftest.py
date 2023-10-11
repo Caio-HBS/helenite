@@ -37,6 +37,20 @@ def valid_data_for_user_and_profile(db, create_new_user):
 
 
 @pytest.fixture
+def create_new_user_and_profile(valid_data_for_user_and_profile):
+    """
+    Creates a new user in the test db, as well as a profile.
+    """
+
+    new_user = User.objects.create(
+        username="testt", email="e@mail.com", password="dasasd312423asd"
+    )
+    valid_data_for_user_and_profile["user"] = new_user
+    new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+    return new_user, new_profile
+
+
+@pytest.fixture
 def valid_data_for_post(db, create_new_user):
     """
     Provides valid data for the creation of a new post.
@@ -71,5 +85,7 @@ def user_and_token(create_new_user):
     Provides a new user and a token alongside it.
     """
 
-    token = Token.objects.create(user=create_new_user, created=timezone.now() - timezone.timedelta(days=6))
+    token = Token.objects.create(
+        user=create_new_user, created=timezone.now() - timezone.timedelta(days=6)
+    )
     return create_new_user, token
