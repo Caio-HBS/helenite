@@ -307,3 +307,15 @@ class UserRegistrationSerializer(serializers.Serializer):
         Profile.objects.create(user=new_user, **validated_data)
 
         return new_user
+    
+
+class ProfileSearchSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user.username")
+    class Meta:
+        model = Profile
+        fields = [
+            "username",
+            "pfp",
+            "endpoint",
+            "get_full_name"
+        ]

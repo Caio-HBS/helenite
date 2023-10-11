@@ -5,12 +5,13 @@ def get_client():
     return algolia_engine.client
 
 
-def perform_search(query, **kwargs):
+def get_index(index_name):
     client = get_client()
-    results = results = client.multiple_queries(
-    [
-        {'indexName': 'Helenite_Profile', 'query': query},
-        {'indexName': 'Helenite_Post', 'query': query}
-    ]
-    )
+    index = client.init_index(index_name)
+    return index
+
+
+def perform_search(query, index, **kwargs):
+    index = get_index(index)
+    results = index.search(query)
     return results

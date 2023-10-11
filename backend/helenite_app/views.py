@@ -23,6 +23,7 @@ from helenite_app.serializers import (
     SettingsSerializer,
     UserRegistrationSerializer,
     NewCommentSerializer,
+    ProfileSearchSerializer,
 )
 from helenite_app.authentication import TokenAuthentication
 from helenite_app.permissions import TokenAgePermission, IsUserPermission
@@ -203,57 +204,54 @@ class DiscoverListAPIView(generics.ListAPIView):
         return queryset
 
 
-class SearchListView(generics.GenericAPIView):
+class SearchListView(generics.ListAPIView):
     # TODO: Algolia LOGO.
     """
     View dedicated to search both the `Profile` as well as the `Post` indexes.
 
-    Inherits from DRF's GenericAPIView to provide a list of up profiles and/or
-    posts that match the query provided by the user through the use of the Algolia
+    Inherits from DRF's ListAPIView to provide a list of profiles or posts that 
+    match the query and the index provided by the user through the use of the Algolia
     search engine.
 
-    Endpoint URL: /api/v1/search/?q=query+parameters
+    Endpoint URL: /api/v1/search/?q=query+parameters&index=index
     HTTP Methods Allowed: GET
     """
     
-    renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated, TokenAgePermission]
     authentication_classes = [TokenAuthentication, SessionAuthentication]
 
-    def algolia_search(self, query):
-        results_from_algolia = client.perform_search(query)
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        index = self.request.GET.get("index")
 
-        profile_slugs = []
-        post_slugs = []
-
-        if results_from_algolia.get("results") != []:
-            for result in results_from_algolia["results"]:
-                index = result.get("index")
-                for hit in result["hits"]:
-                    if index == "Helenite_Profile":               
-                        profile_slugs.append(hit["endpoint"].split("/")[-2])
-                    elif index == "Helenite_Post":
-                        post_slugs.append(hit["endpoint"].split("/")[-2])
-                
-
-        slugs = {
-            "profiles": profile_slugs,
-            "posts": post_slugs
-        }
+        if not query or query == "":
+            return Response({"detail": "Query cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+        if not index or index == "":
+            return Response({"detail": "Index cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+        if index != "Helenite_Profile" and index != "Helenite_Post":
+            return Response({"detail": "Invalid index."}, status=status.HTTP_400_BAD_REQUEST)
         
-        if slugs["posts"] == [] and slugs["profiles"] == []:
-            return None
+        results_from_algolia = client.perform_search(query, index)
         
-        return slugs
+        slugs = []
+        for hit in results_from_algolia["hits"]:
+            endpoint = hit["endpoint"]
+            slug = endpoint.split("/")[-2]
+            slugs.append(slug)
+        
+        queryset = Profile.objects.filter(custom_slug_profile__in=slugs)
+        return queryset
+    
+    def get_serializer_class(self, *args, **kwargs):
+        return ProfileSearchSerializer
 
     def get(self, request, *args, **kwargs):
-        query = request.GET.get('q')
-        if not query:
-            return Response({"detail": "Query cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
-        search_results = self.algolia_search(query)
+        search_results = self.get_queryset()
         
         if search_results is None:
             return Response({"detail": "Sorry, we couldn't find any matches."}, status=status.HTTP_204_NO_CONTENT)
+        
+        return Response(self.get_serializer(search_results, many=True).data)
 
 
 class ProfileRetriveAPIView(generics.RetrieveAPIView):
@@ -342,7 +340,6 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
 
 
 class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
-    # TODO: Like a post here too.
     """
     View to retrieve a single post based on the post_slug. Also allows for commenting
     and deleting the post.
