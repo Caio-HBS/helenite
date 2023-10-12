@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -250,8 +252,13 @@ class SettingsSerializer(serializers.ModelSerializer):
                     "Unable to confirm new password. Are they the same?"
                 )
             else:
-                # TODO: Add password verification.
-                pass
+                # Both passwords present and equal. Proceed to check them further.
+                if len(data.get("new_password")) < 8:
+                    raise serializers.ValidationError("Password needs to be at least 8 characters long.")
+                elif re.search(r"\w", data.get("new_password")) is None:
+                    raise serializers.ValidationError("Password needs to have at least one letter.")
+                elif re.search(r"\d", data.get("new_password")) is None:
+                    raise serializers.ValidationError("Password needs to have at least one number.")
         return data
 
 
@@ -288,11 +295,16 @@ class UserRegistrationSerializer(serializers.Serializer):
     private_profile = serializers.BooleanField(default=False)
 
     def create(self, validated_data):
-        # TODO: add extra password validation.
         if validated_data.get("password") != validated_data.get(
             "confirmation_password"
         ):
             raise serializers.ValidationError("Passwords don't correspond.")
+        elif len(validated_data.get("password")) < 8:
+            raise serializers.ValidationError("Password needs to be at least 8 characters long.")
+        elif re.search(r"\w", validated_data.get("password")) is None:
+            raise serializers.ValidationError("Password needs to have at least one letter.")
+        elif re.search(r"\d", validated_data.get("password")) is None:
+            raise serializers.ValidationError("Password needs to have at least one number.")
 
         validated_for_user = {}
         validated_for_user["username"] = validated_data.get("username")
