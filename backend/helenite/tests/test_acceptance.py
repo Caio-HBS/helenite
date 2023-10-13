@@ -16,58 +16,53 @@ from rest_framework.authtoken.models import Token
 
 def test_login_endpoint_success(db) -> None:
     """
-    TODO: Add documentation.
+    Tests the login endpoint functionality by providing a valid username and
+    password.
     """
-    
+
     user = User.objects.create_user(username="testuser", password="testpassword")
 
     client = APIClient()
 
-    data = {
-        "username": "testuser",
-        "password": "testpassword"
-    }
+    data = {"username": "testuser", "password": "testpassword"}
 
-    response = client.post(reverse("login_endpoint"), data=data, format='json')
-    
+    response = client.post(reverse("login_endpoint"), data=data, format="json")
+
     assert response.status_code == 200
     assert "token" in response.data
 
-    token_key = response.data['token']
+    token_key = response.data["token"]
     token = Token.objects.get(key=token_key)
     assert token.user == user
 
 
 def test_login_endpoint_fail(db) -> None:
     """
-    TODO: Add documentation.
+    Tests the login endpoint by providing an invalid password.
     """
 
-    User.objects.create_user(username='testuser', password='testpassword')
+    User.objects.create_user(username="testuser", password="testpassword")
 
     client = APIClient()
 
-    data = {
-        "username": "testuser",
-        "password": "wrongpassword"
-    }
+    data = {"username": "testuser", "password": "wrongpassword"}
 
-    response = client.post(reverse("login_endpoint"), data=data, format='json')
-    
+    response = client.post(reverse("login_endpoint"), data=data, format="json")
+
     assert response.status_code == 400
     assert "non_field_errors" in response.data
 
 
 def test_logout_endpoint(user_and_token) -> None:
     """
-    TODO: Add documentation.
+    Tests the logout endpoint functionality.
     """
 
     user, token = user_and_token
 
     client = APIClient()
 
-    headers = {'Authorization': f"Bearer {token}"}
+    headers = {"Authorization": f"Bearer {token}"}
     response = client.post(reverse("logout_endpoint"), headers=headers)
 
     assert response.status_code == 200
@@ -77,7 +72,8 @@ def test_logout_endpoint(user_and_token) -> None:
 
 def test_register_endpoint_success(db, valid_data_for_register_api) -> None:
     """
-    TODO: Add documentation.
+    Tests the register endpoint functionality by providing valid data for the
+    creation.
     """
 
     data = valid_data_for_register_api
@@ -98,38 +94,50 @@ def test_register_endpoint_fail_password_check(db, valid_data_for_register_api) 
 
     client = APIClient()
 
+    # Unmatched passwords.
     valid_data_wrong_password = valid_data_for_register_api
     valid_data_for_register_api["password"] = "dsasd23123"
     valid_data_for_register_api["confirmation_password"] = "dsasd23123ddfddd"
 
-    response_wrong_password = client.post(reverse("register_new_user"), data=valid_data_wrong_password, format="json")
+    response_wrong_password = client.post(
+        reverse("register_new_user"), data=valid_data_wrong_password, format="json"
+    )
 
     assert response_wrong_password.status_code == 400
     assert "Passwords don't correspond." in response_wrong_password.data
 
+    # Password is not long enough.
     invalid_data_length = valid_data_wrong_password
     invalid_data_length["password"] = "das23"
     invalid_data_length["confirmation_password"] = "das23"
 
-    response_length = client.post(reverse("register_new_user"), data=invalid_data_length, format="json")
+    response_length = client.post(
+        reverse("register_new_user"), data=invalid_data_length, format="json"
+    )
 
     assert response_length.status_code == 400
     assert "Password needs to be at least 8 characters long." in response_length.data
 
+    # Password doesn't have any letters.
     invalid_data_no_letter = valid_data_wrong_password
     invalid_data_no_letter["password"] = "12345678"
     invalid_data_no_letter["confirmation_password"] = "12345678"
 
-    response_no_letter = client.post(reverse("register_new_user"), data=invalid_data_no_letter, format="json")
+    response_no_letter = client.post(
+        reverse("register_new_user"), data=invalid_data_no_letter, format="json"
+    )
 
     assert response_no_letter.status_code == 400
     assert "Password needs to have at least one letter." in response_no_letter.data
 
+    # Password doesn't have any numbers.
     invalid_data_no_number = valid_data_wrong_password
     invalid_data_no_number["password"] = "abcdefgh"
     invalid_data_no_number["confirmation_password"] = "abcdefgh"
 
-    response_no_number = client.post(reverse("register_new_user"), data=invalid_data_no_number, format="json")
+    response_no_number = client.post(
+        reverse("register_new_user"), data=invalid_data_no_number, format="json"
+    )
 
     assert response_no_number.status_code == 400
     assert "Password needs to have at least one number." in response_no_number.data
@@ -137,7 +145,7 @@ def test_register_endpoint_fail_password_check(db, valid_data_for_register_api) 
 
 def test_register_endpoint_fail(db, valid_data_for_register_api) -> None:
     """
-    TODO: Add documentation.
+    Tests the register endpoint functionality by providing incomplete information.
     """
 
     data = valid_data_for_register_api

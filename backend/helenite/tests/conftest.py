@@ -91,8 +91,13 @@ def user_and_token(create_new_user):
     )
     return create_new_user, token
 
+
 @pytest.fixture
 def valid_data_for_register_api():
+    """
+    Provides valid data for the registration on the endpoint.
+    """
+    
     return {
         "username": "testuser_api",
         "email": "user@email.com",
@@ -104,5 +109,5 @@ def valid_data_for_register_api():
         "birth_place": "City",
         "show_birthday": True,
         "custom_slug_profile": "tilthbs",
-        "private_profile": False
+        "private_profile": False,
     }
