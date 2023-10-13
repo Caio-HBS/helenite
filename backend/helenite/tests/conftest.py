@@ -47,6 +47,7 @@ def create_new_user_and_profile(valid_data_for_user_and_profile):
     )
     valid_data_for_user_and_profile["user"] = new_user
     new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+    
     return new_user, new_profile
 
 
