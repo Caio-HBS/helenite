@@ -300,7 +300,7 @@ class UserRegistrationSerializer(serializers.Serializer):
             raise serializers.ValidationError("Passwords don't correspond.")
         elif len(validated_data.get("password")) < 8:
             raise serializers.ValidationError("Password needs to be at least 8 characters long.")
-        elif re.search(r"\w", validated_data.get("password")) is None:
+        elif re.search(r"\D", validated_data.get("password")) is None:
             raise serializers.ValidationError("Password needs to have at least one letter.")
         elif re.search(r"\d", validated_data.get("password")) is None:
             raise serializers.ValidationError("Password needs to have at least one number.")
