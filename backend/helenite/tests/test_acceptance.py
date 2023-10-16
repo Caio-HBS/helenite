@@ -1,7 +1,3 @@
-"""
-    test_change_settings_endpoint
-    test_retrieve_post_endpoint
-"""
 import pytest
 
 from django.urls import reverse
@@ -357,9 +353,226 @@ def test_profile_endpoint(
     assert "Not found." in invalid_response.data["detail"]
 
 
-# def test_() -> None:
+def test_change_settings_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+) -> None:
+    """
+    Tests both the change pfp functionality as well as the the change settings in
+    the endpoint by providing the necessary info.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+    slug = new_profile.custom_slug_profile
+
+    # Test GET.
+    headers = {"Authorization": f"Bearer {token}"}
+    client = APIClient()
+
+    response_get = client.get(
+        reverse("change_settings_endpoint", kwargs={"custom_slug_profile": slug}),
+        headers=headers,
+    )
+
+    assert response_get.status_code == 200
+
+    # Test PATCH other settings.
+    data = {
+        "pfp": open("helenite/tests/test_image.png", "rb"),
+        "private_profile": True,
+        "show_birthday": False,
+    }
+
+    response_patch = client.patch(
+        reverse("change_settings_endpoint", kwargs={"custom_slug_profile": slug}),
+        headers=headers,
+        data=data,
+        format="multipart",
+    )
+
+    assert response_patch.status_code == 200
+    assert (
+        response_patch.data["private_profile"] == True
+        and response_patch.data["show_birthday"] == False
+    )
+    assert "test_image" in response_patch.data["pfp"]
+
+
+# def test_change_settings_endpoint_new_password(
+#     db, user_and_token, valid_data_for_user_and_profile
+# ) -> None:
 #     """
-#     TODO: Add documentation.
+#     TODO: Add documentation
 #     """
 
-#     pass
+#     user, token = user_and_token
+#     valid_data_for_user_and_profile["user"] = user
+#     new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+#     slug = new_profile.custom_slug_profile
+
+#     headers = {"Authorization": f"Bearer {token}"}
+#     client = APIClient()
+
+#     data = {
+#         "old_password": "dasad232das234",
+#         "new_password": "ddjkp23231",
+#         "confirm_new_password": "ddjkp23231"
+#     }
+
+#     valid_response = client.patch(reverse("change_settings_endpoint", kwargs={"custom_slug_profile": slug}), headers=headers, data=data, format="json")
+
+#     print(valid_response.data)
+#     print(valid_response.status_code)
+
+
+def test_delete_account_change_settings_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+) -> None:
+    """
+    Tests the delete account functionality on the profile settings endpoint.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+    slug = new_profile.custom_slug_profile
+
+    headers = {"Authorization": f"Bearer {token}"}
+    client = APIClient()
+
+    response = client.delete(
+        reverse("change_settings_endpoint", kwargs={"custom_slug_profile": slug}),
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.data["detail"] == "Accound successfully deleted."
+
+
+def test_retrieve_post_enpoint(
+    db, user_and_token, valid_data_for_user_and_profile, valid_data_for_post
+) -> None:
+    """
+    Tests the retrieve single post endpoint basic functionality.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+
+    valid_data_for_post["post_parent_user"] = user
+    valid_data_for_post.pop("post_image")
+    valid_data_for_post.pop("post_publication_date")
+    new_post = Post.objects.create(**valid_data_for_post)
+
+    headers = {"Authorization": f"Bearer {token}"}
+    client = APIClient()
+
+    response = client.get(
+        reverse(
+            "single_post_endpoint",
+            kwargs={"post_slug": valid_data_for_post["post_slug"]},
+        ),
+        headers=headers
+    )
+
+    assert response.status_code == 200
+    assert user.username == response.data["profile"]["username"]
+    assert valid_data_for_post["post_text"] == response.data["post_text"]
+
+
+def test_new_comment_on_post_retrieve_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile, valid_data_for_post
+) -> None:
+    """
+    Tests the leave a comment functionality on the single post endpoint.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+
+    valid_data_for_post["post_parent_user"] = user
+    valid_data_for_post.pop("post_image")
+    valid_data_for_post.pop("post_publication_date")
+    new_post = Post.objects.create(**valid_data_for_post)
+
+    headers = {"Authorization": f"Bearer {token}"}
+    client = APIClient()
+    data = {
+        "comment_text": "test comment"
+    }
+
+    response = client.post(
+        reverse(
+            "single_post_endpoint",
+            kwargs={"post_slug": valid_data_for_post["post_slug"]},
+        ),
+        headers=headers, data=data
+    )
+
+    assert response.status_code == 201
+    assert response.data["comment_text"] == data["comment_text"]
+
+
+def test_delete_post_on_post_retrieve_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile, valid_data_for_post
+) -> None:
+    """
+    Tests the post deletion functionality on the single post endpoint.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+
+    valid_data_for_post["post_parent_user"] = user
+    valid_data_for_post.pop("post_image")
+    valid_data_for_post.pop("post_publication_date")
+    new_post = Post.objects.create(**valid_data_for_post)
+
+    headers = {"Authorization": f"Bearer {token}"}
+    client = APIClient()
+
+    response = client.delete(
+        reverse(
+            "single_post_endpoint",
+            kwargs={"post_slug": valid_data_for_post["post_slug"]},
+        ),
+        headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.data["detail"] == "Your post was successfully deleted."
+
+
+def test_like_post_on_post_retrieve_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile, valid_data_for_post
+) -> None:
+    """
+    TODO: Add documentation.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
+
+    valid_data_for_post["post_parent_user"] = user
+    valid_data_for_post.pop("post_image")
+    valid_data_for_post.pop("post_publication_date")
+    new_post = Post.objects.create(**valid_data_for_post)
+
+    headers = {"Authorization": f"Bearer {token}"}
+    client = APIClient()
+
+    response = client.put(
+        reverse(
+            "single_post_endpoint",
+            kwargs={"post_slug": valid_data_for_post["post_slug"]},
+        ),
+        headers=headers
+    )
+
+    print(response.status_code)
+    print(response.data)
