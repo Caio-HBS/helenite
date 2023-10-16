@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from rest_framework import generics, serializers, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -122,6 +123,7 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticated, TokenAgePermission]
     authentication_classes = [TokenAuthentication, SessionAuthentication]
+    parser_classes = [JSONParser, MultiPartParser]
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -296,6 +298,7 @@ class ChangeSettingsAPIView(generics.RetrieveUpdateAPIView):
 
     permission_classes = [IsAuthenticated, IsUserPermission, TokenAgePermission]
     authentication_classes = [TokenAuthentication, SessionAuthentication]
+    parser_classes = [MultiPartParser]
     lookup_field = "custom_slug_profile"
     serializer_class = SettingsSerializer
     queryset = Profile.objects.filter()
@@ -364,6 +367,7 @@ class PostRetriveCreateDeleteAPIView(generics.RetrieveAPIView):
 
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated, TokenAgePermission]
+    parser_classes = [MultiPartParser]
     queryset = Post.objects.filter()
     lookup_field = "post_slug"
 
