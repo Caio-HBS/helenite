@@ -1,7 +1,4 @@
 """
-    test_feed_endpoint
-    test_discover_endpoint
-    test_retrieve_profile_endpoint
     test_change_settings_endpoint
     test_retrieve_post_endpoint
 """
@@ -12,6 +9,8 @@ from django.contrib.auth.models import User
 
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
+
+from helenite_app.models import Profile, Post
 
 
 def test_login_endpoint_success(db) -> None:
@@ -160,9 +159,207 @@ def test_register_endpoint_fail(db, valid_data_for_register_api) -> None:
     assert response.data["detail"] == "Invalid data."
 
 
-def test_() -> None:
+def test_feed_endpoint_get_method(
+    db, user_and_token, valid_data_for_post, valid_data_for_user_and_profile
+) -> None:
     """
-    TODO: Add documentation.
+    Tests the feed endpoint functionality by creating a post and trying to retrieve it.
     """
 
-    pass
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    valid_data_for_post["post_parent_user"] = user
+    Post.objects.create(**valid_data_for_post)
+
+    client = APIClient()
+
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.get(reverse("feed_endpoint"), headers=headers)
+
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+    assert response.data["results"] != []
+
+
+def test_feed_endpoint_get_method_no_results(
+    db, user_and_token, valid_data_for_user_and_profile
+) -> None:
+    """
+    Tests that a new account with no friends and no posts will return an empty feed.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    client = APIClient()
+
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.get(reverse("feed_endpoint"), headers=headers)
+
+    assert response.status_code == 200
+    assert response.data["count"] == 0
+    assert response.data["results"] == []
+
+
+def test_feed_endpoint_post_method_success(
+    db, user_and_token, valid_data_for_user_and_profile
+) -> None:
+    """
+    Tests the creation of new posts through the feed endpoint.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Valid data.
+    valid_data = {
+        "post_text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+    }
+
+    client = APIClient()
+
+    valid_response_post = client.post(
+        reverse("feed_endpoint"), headers=headers, data=valid_data, format="json"
+    )
+
+    assert valid_response_post.status_code == 201
+    assert valid_response_post.data["parent_user"] == user.username
+    assert valid_response_post.data["post_text"] == valid_data["post_text"]
+
+    response_for_post = client.get(reverse("feed_endpoint"), headers=headers)
+
+    assert response_for_post.status_code == 200
+    assert response_for_post.data["count"] == 1
+
+    # Invalid data
+    invalid_data = {}
+
+    invalid_response = client.post(
+        reverse("feed_endpoint"), headers=headers, data=invalid_data, format="json"
+    )
+
+    assert invalid_response.status_code == 400
+    assert "non_field_errors" in invalid_response.data
+    assert (
+        "You either need an image or some text to create a post."
+        in invalid_response.data["non_field_errors"]
+    )
+
+
+def test_feed_endpoint_put_method_success(
+    db, user_and_token, valid_data_for_post, valid_data_for_user_and_profile
+) -> None:
+    """
+    Tests the like and unlike functions for the feed endpoint.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    valid_data_for_post["post_parent_user"] = user
+    new_post = Post.objects.create(**valid_data_for_post)
+    slug = new_post.post_slug
+
+    client = APIClient()
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    data = {"post_slug": slug}
+
+    # Like a post.
+    response_like = client.put(
+        reverse("feed_endpoint"), headers=headers, data=data, format="json"
+    )
+
+    assert response_like.status_code == 201
+    assert response_like.data["detail"] == "Successfully liked post."
+
+    # Unlike a post.
+    response_unlike = client.put(
+        reverse("feed_endpoint"), headers=headers, data=data, format="json"
+    )
+
+    assert response_unlike.status_code == 200
+    assert response_unlike.data["detail"] == "Successfully unliked post."
+
+
+def test_discover_endoint_success(
+    db, user_and_token, valid_data_for_post, valid_data_for_user_and_profile
+) -> None:
+    """
+    Tests the discover endpoint functionality
+    """
+
+    user1, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user1
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    user2 = User.objects.create(username="test2", password="3213asd312ads")
+    valid_data_for_user_and_profile["user"] = user2
+    valid_data_for_user_and_profile["custom_slug_profile"] = "test2user"
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    valid_data_for_post["post_parent_user"] = user2
+    new_post = Post.objects.create(**valid_data_for_post)
+
+    client = APIClient()
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = client.get(reverse("discover_endpoint"), headers=headers)
+
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+    assert response.data["results"] != []
+
+
+def test_profile_endpoint(
+    db, user_and_token, valid_data_for_post, valid_data_for_user_and_profile
+) -> None:
+    """
+    Tests the single profile retrieval functionality.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    valid_data_for_post["post_parent_user"] = user
+    Post.objects.create(**valid_data_for_post)
+
+    client = APIClient()
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    valid_response = client.get(
+        reverse("profile_info_endpoint", kwargs={"custom_slug_profile": "test"}),
+        headers=headers,
+    )
+
+    assert valid_response.status_code == 200
+    assert valid_response.data["username"] == "test"
+    assert "test" in valid_response.data["endpoint"]
+    assert len(valid_response.data["posts"]) == 1
+
+    invalid_response = client.get(
+        reverse("profile_info_endpoint", kwargs={"custom_slug_profile": "invalid"}),
+        headers=headers,
+    )
+
+    assert invalid_response.status_code == 404
+    assert "Not found." in invalid_response.data["detail"]
+
+
+# def test_() -> None:
+#     """
+#     TODO: Add documentation.
+#     """
+
+#     pass

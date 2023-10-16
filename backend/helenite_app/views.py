@@ -134,7 +134,7 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
 
         queryset = Post.objects.filter(
             Q(post_parent_user=user) | Q(post_parent_user__profile__in=friends)
-        )
+        ).order_by("-post_publication_date")
         return queryset
 
     def perform_create(self, serializer):
@@ -275,6 +275,8 @@ class ProfileRetriveAPIView(generics.RetrieveAPIView):
 
     lookup_field = "custom_slug_profile"
     serializer_class = FeedForSingleProfileSerializer
+    permission_classes = [IsAuthenticated, TokenAgePermission]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
 
     def get_queryset(self):
         queryset = Profile.objects.filter()
