@@ -181,7 +181,7 @@ class NewCommentSerializer(serializers.ModelSerializer):
 
     def validate_comment_text(self, value):
         if not value.strip():
-            raise serializers.ValidationError("Text commend can't be blank.")
+            raise serializers.ValidationError("Text comment can't be blank.")
         return value
 
 
@@ -204,6 +204,17 @@ class NewPostSerializer(serializers.ModelSerializer):
             "post_text",
             "post_image",
         ]
+
+    def validate(self, data):
+        post_text = data.get("post_text")
+        post_image = data.get("post_image")
+
+        if not post_text and not post_image:
+            raise serializers.ValidationError(
+                "You either need an image or some text to create a post."
+            )
+
+        return data
 
 
 class SettingsSerializer(serializers.ModelSerializer):
@@ -253,11 +264,17 @@ class SettingsSerializer(serializers.ModelSerializer):
             else:
                 # Both passwords present and equal. Proceed to check them further.
                 if len(data.get("new_password")) < 8:
-                    raise serializers.ValidationError("Password needs to be at least 8 characters long.")
+                    raise serializers.ValidationError(
+                        "Password needs to be at least 8 characters long."
+                    )
                 elif re.search(r"\w", data.get("new_password")) is None:
-                    raise serializers.ValidationError("Password needs to have at least one letter.")
+                    raise serializers.ValidationError(
+                        "Password needs to have at least one letter."
+                    )
                 elif re.search(r"\d", data.get("new_password")) is None:
-                    raise serializers.ValidationError("Password needs to have at least one number.")
+                    raise serializers.ValidationError(
+                        "Password needs to have at least one number."
+                    )
         return data
 
 
@@ -299,11 +316,17 @@ class UserRegistrationSerializer(serializers.Serializer):
         ):
             raise serializers.ValidationError("Passwords don't correspond.")
         elif len(validated_data.get("password")) < 8:
-            raise serializers.ValidationError("Password needs to be at least 8 characters long.")
+            raise serializers.ValidationError(
+                "Password needs to be at least 8 characters long."
+            )
         elif re.search(r"\D", validated_data.get("password")) is None:
-            raise serializers.ValidationError("Password needs to have at least one letter.")
+            raise serializers.ValidationError(
+                "Password needs to have at least one letter."
+            )
         elif re.search(r"\d", validated_data.get("password")) is None:
-            raise serializers.ValidationError("Password needs to have at least one number.")
+            raise serializers.ValidationError(
+                "Password needs to have at least one number."
+            )
 
         validated_for_user = {}
         validated_for_user["username"] = validated_data.get("username")

@@ -143,7 +143,7 @@ class FeedListCreateAPIView(generics.ListCreateAPIView):
         except Profile.DoesNotExist:
             raise serializers.ValidationError("Couldn't find this profile")
 
-        if not self.request.user.is_staff and get_user.user != self.request.user:
+        if not self.request.user.is_staff and get_user != self.request.user:
             raise serializers.ValidationError(
                 "You don't have permission to perform this action"
             )
