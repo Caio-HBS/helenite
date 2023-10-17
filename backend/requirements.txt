@@ -1,5 +1,5 @@
 algoliasearch==2.6.3
-algoliasearch-django>=2.0,<3.0
+algoliasearch-django==2.0.0
 asgiref==3.6.0
 attrs==22.2.0
 black==23.1.0
@@ -47,6 +47,7 @@ pyparsing==2.4.7
 PyPDF2==2.10.1
 pytest==7.3.1
 pytest-django==4.5.2
+pytest-mock==3.11.1
 pytest-sugar==0.9.6
 python-apt==2.4.0+ubuntu2
 python-dotenv==1.0.0

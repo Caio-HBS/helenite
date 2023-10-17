@@ -1,12 +1,21 @@
+import os
+import json
 import pytest
 
 from django.urls import reverse
+from django.test import RequestFactory
 from django.contrib.auth.models import User
 
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
 
+from helenite import settings
+
+from helenite_app.views import SearchListView
 from helenite_app.models import Profile, Post
+
+
+test_data_path = os.path.join(settings.BASE_DIR, r"helenite/tests/")
 
 
 def test_login_endpoint_success(db) -> None:
@@ -14,7 +23,6 @@ def test_login_endpoint_success(db) -> None:
     Tests the login endpoint functionality by providing a valid username and
     password.
     """
-
     user = User.objects.create_user(username="testuser", password="testpassword")
 
     client = APIClient()
@@ -367,7 +375,7 @@ def test_change_settings_endpoint(
 
     # Test PATCH other settings.
     data = {
-        "pfp": open("helenite/tests/test_image.png", "rb"),
+        "pfp": open(os.path.join(test_data_path, r"tests_data/test_image.png"), "rb"),
         "private_profile": True,
         "show_birthday": False,
     }
@@ -551,3 +559,40 @@ def test_like_post_on_post_retrieve_endpoint(
 
     assert response_unlike.status_code == 200
     assert response_unlike.data["detail"] == "Successfully unliked post."
+
+
+def test_search_endpoint(
+    db, mocker, user_and_token, valid_data_for_user_and_profile
+) -> None:
+    """
+    Tests the search endpoint by providing a mock of the Algolia response.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    query_parameter = user.username
+
+    view = SearchListView.as_view()
+
+    with open(
+        os.path.join(test_data_path, r"tests_data/search_mock.json"), "r"
+    ) as mock_json:
+        mocked_response = json.load(mock_json)
+
+    mocker.patch(
+        "helenite_app.views.client.perform_search", return_value=mocked_response
+    )
+
+    factory = RequestFactory()
+
+    request = factory.get(
+        (reverse("search_endpoint") + f"?q={query_parameter}&index=Helenite_Profile"),
+        HTTP_AUTHORIZATION=f"Bearer {token}",
+    )
+    response = view(request)
+
+    assert response.status_code == 200
+    assert "test" in response.data[0]["endpoint"]
+    assert response.data[0]["username"] == query_parameter
