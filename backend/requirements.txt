@@ -45,7 +45,6 @@ pytest==7.3.1
 pytest-django==4.5.2
 pytest-mock==3.11.1
 pytest-sugar==0.9.6
-python-apt==2.4.0+ubuntu2
 python-dotenv==1.0.0
 pyttsx3==2.90
 pytube==12.1.2
