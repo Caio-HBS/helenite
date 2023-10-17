@@ -18,9 +18,7 @@ def test_login_endpoint_success(db) -> None:
     user = User.objects.create_user(username="testuser", password="testpassword")
 
     client = APIClient()
-
     data = {"username": "testuser", "password": "testpassword"}
-
     response = client.post(reverse("login_endpoint"), data=data, format="json")
 
     assert response.status_code == 200
@@ -28,6 +26,7 @@ def test_login_endpoint_success(db) -> None:
 
     token_key = response.data["token"]
     token = Token.objects.get(key=token_key)
+
     assert token.user == user
 
 
@@ -39,7 +38,6 @@ def test_login_endpoint_fail(db) -> None:
     User.objects.create_user(username="testuser", password="testpassword")
 
     client = APIClient()
-
     data = {"username": "testuser", "password": "wrongpassword"}
 
     response = client.post(reverse("login_endpoint"), data=data, format="json")
@@ -56,7 +54,6 @@ def test_logout_endpoint(user_and_token) -> None:
     user, token = user_and_token
 
     client = APIClient()
-
     headers = {"Authorization": f"Bearer {token}"}
     response = client.post(reverse("logout_endpoint"), headers=headers)
 
@@ -72,9 +69,7 @@ def test_register_endpoint_success(db, valid_data_for_register_api) -> None:
     """
 
     data = valid_data_for_register_api
-
     client = APIClient()
-
     response = client.post(reverse("register_new_user"), data=data, format="json")
 
     assert response.status_code == 201
@@ -145,7 +140,6 @@ def test_register_endpoint_fail(db, valid_data_for_register_api) -> None:
 
     data = valid_data_for_register_api
     valid_data_for_register_api.pop("first_name")
-
     client = APIClient()
 
     response = client.post(reverse("register_new_user"), data=data, format="json")
@@ -170,8 +164,8 @@ def test_feed_endpoint_get_method(
     Post.objects.create(**valid_data_for_post)
 
     client = APIClient()
-
     headers = {"Authorization": f"Bearer {token}"}
+
     response = client.get(reverse("feed_endpoint"), headers=headers)
 
     assert response.status_code == 200
@@ -191,8 +185,8 @@ def test_feed_endpoint_get_method_no_results(
     Profile.objects.create(**valid_data_for_user_and_profile)
 
     client = APIClient()
-
     headers = {"Authorization": f"Bearer {token}"}
+
     response = client.get(reverse("feed_endpoint"), headers=headers)
 
     assert response.status_code == 200
@@ -212,12 +206,10 @@ def test_feed_endpoint_post_method_success(
     Profile.objects.create(**valid_data_for_user_and_profile)
 
     headers = {"Authorization": f"Bearer {token}"}
-
     # Valid data.
     valid_data = {
         "post_text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     }
-
     client = APIClient()
 
     valid_response_post = client.post(
@@ -264,9 +256,7 @@ def test_feed_endpoint_put_method_success(
     slug = new_post.post_slug
 
     client = APIClient()
-
     headers = {"Authorization": f"Bearer {token}"}
-
     data = {"post_slug": slug}
 
     # Like a post.
@@ -306,7 +296,6 @@ def test_discover_endoint_success(
     new_post = Post.objects.create(**valid_data_for_post)
 
     client = APIClient()
-
     headers = {"Authorization": f"Bearer {token}"}
 
     response = client.get(reverse("discover_endpoint"), headers=headers)
@@ -331,7 +320,6 @@ def test_profile_endpoint(
     Post.objects.create(**valid_data_for_post)
 
     client = APIClient()
-
     headers = {"Authorization": f"Bearer {token}"}
 
     valid_response = client.get(
@@ -399,33 +387,6 @@ def test_change_settings_endpoint(
     assert "test_image" in response_patch.data["pfp"]
 
 
-# def test_change_settings_endpoint_new_password(
-#     db, user_and_token, valid_data_for_user_and_profile
-# ) -> None:
-#     """
-#     TODO: Add documentation
-#     """
-
-#     user, token = user_and_token
-#     valid_data_for_user_and_profile["user"] = user
-#     new_profile = Profile.objects.create(**valid_data_for_user_and_profile)
-#     slug = new_profile.custom_slug_profile
-
-#     headers = {"Authorization": f"Bearer {token}"}
-#     client = APIClient()
-
-#     data = {
-#         "old_password": "dasad232das234",
-#         "new_password": "ddjkp23231",
-#         "confirm_new_password": "ddjkp23231"
-#     }
-
-#     valid_response = client.patch(reverse("change_settings_endpoint", kwargs={"custom_slug_profile": slug}), headers=headers, data=data, format="json")
-
-#     print(valid_response.data)
-#     print(valid_response.status_code)
-
-
 def test_delete_account_change_settings_endpoint(
     db, user_and_token, valid_data_for_user_and_profile
 ) -> None:
@@ -474,7 +435,7 @@ def test_retrieve_post_enpoint(
             "single_post_endpoint",
             kwargs={"post_slug": valid_data_for_post["post_slug"]},
         ),
-        headers=headers
+        headers=headers,
     )
 
     assert response.status_code == 200
@@ -500,16 +461,15 @@ def test_new_comment_on_post_retrieve_endpoint(
 
     headers = {"Authorization": f"Bearer {token}"}
     client = APIClient()
-    data = {
-        "comment_text": "test comment"
-    }
+    data = {"comment_text": "test comment"}
 
     response = client.post(
         reverse(
             "single_post_endpoint",
             kwargs={"post_slug": valid_data_for_post["post_slug"]},
         ),
-        headers=headers, data=data
+        headers=headers,
+        data=data,
     )
 
     assert response.status_code == 201
@@ -540,7 +500,7 @@ def test_delete_post_on_post_retrieve_endpoint(
             "single_post_endpoint",
             kwargs={"post_slug": valid_data_for_post["post_slug"]},
         ),
-        headers=headers
+        headers=headers,
     )
 
     assert response.status_code == 200
@@ -551,7 +511,7 @@ def test_like_post_on_post_retrieve_endpoint(
     db, user_and_token, valid_data_for_user_and_profile, valid_data_for_post
 ) -> None:
     """
-    TODO: Add documentation.
+    Tests the like and unlike functionality on the single post endpoint.
     """
 
     user, token = user_and_token
@@ -566,13 +526,28 @@ def test_like_post_on_post_retrieve_endpoint(
     headers = {"Authorization": f"Bearer {token}"}
     client = APIClient()
 
-    response = client.put(
+    data = {"post_slug": valid_data_for_post["post_slug"]}
+
+    response_like = client.put(
         reverse(
             "single_post_endpoint",
             kwargs={"post_slug": valid_data_for_post["post_slug"]},
         ),
-        headers=headers
+        headers=headers,
+        data=data,
     )
 
-    print(response.status_code)
-    print(response.data)
+    assert response_like.status_code == 201
+    assert response_like.data["detail"] == "Successfully liked post."
+
+    response_unlike = client.put(
+        reverse(
+            "single_post_endpoint",
+            kwargs={"post_slug": valid_data_for_post["post_slug"]},
+        ),
+        headers=headers,
+        data=data,
+    )
+
+    assert response_unlike.status_code == 200
+    assert response_unlike.data["detail"] == "Successfully unliked post."
