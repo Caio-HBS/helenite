@@ -23,31 +23,14 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r backend/requirements.txt
-
-      - name: Set Environment Variables
+  
+      - name: Run pytest
         env:
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DJANGO_DEBUG_STATUS: ${{ secrets.DJANGO_DEBUG_STATUS }}
           ALGOLIA_APPLICATION_ID: ${{ secrets.ALGOLIA_APPLICATION_ID }}
           ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
           ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-        run: |
-          export DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
-          export DJANGO_DEBUG_STATUS=$DJANGO_DEBUG_STATUS
-          export ALGOLIA_APPLICATION_ID=$ALGOLIA_APPLICATION_ID
-          export ALGOLIA_API_KEY=$ALGOLIA_API_KEY
-          export POSTGRES_DB=$POSTGRES_DB
-          export POSTGRES_USER=$POSTGRES_USER
-          export POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-          export POSTGRES_HOST=$POSTGRES_HOST
-          export POSTGRES_PORT=$POSTGRES_PORT
-
-      - name: Run pytest
         run: |
           cd backend
           python3 -m pytest
