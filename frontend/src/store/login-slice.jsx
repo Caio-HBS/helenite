@@ -11,13 +11,12 @@ const loginSlice = createSlice({
     setLoginCredentials(state) {
       state.token = localStorage.getItem("token") || null;
       state.expirationDate = localStorage.getItem("expiration") || null;
-      state.isLoggedIn =
-        state.token && state.expirationDate
-          ? true
-          : false;
+      state.isLoggedIn = state.token && state.expirationDate ? true : false;
     },
-    logout() {
-      // TODO: this.
+    logout(state) {
+      state.isLoggedIn = false;
+      state.token = null;
+      state.expirationDate = null;
     },
   },
 });
