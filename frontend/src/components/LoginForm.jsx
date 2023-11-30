@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Form } from "react-router-dom";
 
 export default function LoginForm() {
   const [showPassword, setShowPassowrd] = useState(false);
@@ -10,33 +11,11 @@ export default function LoginForm() {
     setShowPassowrd((oldState) => !oldState);
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    const fd = new FormData(event.target);
-    const data = Object.fromEntries(fd.entries());
-
-    const response = await fetch("http://localhost:8000/api/v1/login/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      // TODO: this.
-    }
-
-    const responseData = await response.json();
-    const token = responseData.token
-
-    console.log(token);
-  }
-
   return (
-    <form
-      id="main-element"
+    <Form
+      action="/login"
+      method="POST"
       className="flex flex-col h-screen items-center justify-center"
-      onSubmit={handleSubmit}
     >
       <div className="text-center p-10 rounded-md bg-helenite-dark-grey shadow-2xl">
         <div className="flex">
@@ -62,12 +41,13 @@ export default function LoginForm() {
           />
           <button
             className="ml-2 text-helenite-light-blue hover:text-helenite-dark-blue text-sm"
+            type="button"
             onClick={showPasswordHandler}
           >
             Show password
           </button>
         </div>
       </div>
-    </form>
+    </Form>
   );
 }

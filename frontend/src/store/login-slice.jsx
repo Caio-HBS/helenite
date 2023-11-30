@@ -5,10 +5,16 @@ const loginSlice = createSlice({
   initialState: {
     isLoggedIn: false,
     token: null,
+    expirationDate: null,
   },
   reducers: {
-    login() {
-      // TODO: this.
+    setLoginCredentials(state) {
+      state.token = localStorage.getItem("token") || null;
+      state.expirationDate = localStorage.getItem("expiration") || null;
+      state.isLoggedIn =
+        state.token && state.expirationDate
+          ? true
+          : false;
     },
     logout() {
       // TODO: this.
