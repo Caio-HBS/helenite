@@ -9,7 +9,7 @@ import AboutUsPage from "./pages/AboutUs.jsx";
 import Register from "./pages/Register.jsx";
 import RootLayout from "./pages/Root.jsx";
 import ErrorPage from "./pages/Error.jsx";
-import LoginPage, { action as loginAction } from "./pages/Login.jsx";
+import LoginPage from "./pages/Login.jsx";
 import HomePage from "./pages/Home.jsx";
 import FeedPage from "./pages/Feed.jsx";
 
@@ -20,7 +20,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "/login", element: <LoginPage />, action: loginAction },
+      { path: "/login", element: <LoginPage /> },
       { path: "/register", element: <Register /> },
       { path: "/about-us", element: <AboutUsPage /> },
       { path: "/post/:postId", element: <PostDetailPage /> },

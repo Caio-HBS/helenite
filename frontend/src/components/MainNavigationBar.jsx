@@ -1,18 +1,28 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useNavigate, Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 
 import HeleniteFullLogo from "/helenite_full_logo.png";
+import { loginActions } from "../store/login-slice.jsx";
 
 export default function MainNavigationBar() {
   const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
 
-  const loginButtonClass =
-    "bg-helenite-dark-blue text-helenite-white hover:bg-helenite-light-blue hover:text-gray-500 px-4 py-2 fixed ";
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
 
   function handleLogout() {
-    // TODO: this.
+    localStorage.removeItem("token");
+    localStorage.removeItem("expiration");
+
+    dispatch(loginActions.logout());
+
+    navigate("/");
   }
+
+  const loginButtonClass =
+    "bg-helenite-dark-blue text-helenite-white hover:bg-helenite-light-blue hover:text-gray-500 px-4 py-2 ";
 
   return (
     <header className="fixed w-full">
@@ -32,11 +42,13 @@ export default function MainNavigationBar() {
         </div>
         {isLoggedIn && (
           <div className="flex m-auto">
-            <input
-              type="text"
-              placeholder="I'm looking for..."
-              className="bg-helenite-white text-helenite-dark-grey focus:outline-none focus:border-0 focus:outline-helenite-light-blue"
-            />
+            <div>
+              <input
+                type="text"
+                placeholder="I'm looking for..."
+                className="bg-helenite-white text-helenite-dark-grey focus:outline-none focus:border-0 focus:outline-helenite-light-blue h-12"
+              />
+            </div>
             <button className="bg-helenite-light-blue text-helenite-dark-grey hover:text-gray-500 ml-1 px-4 py-2">
               Search
             </button>
@@ -48,7 +60,7 @@ export default function MainNavigationBar() {
               Logout
             </button>
           ) : (
-            <button className={loginButtonClass + "right-2"}>
+            <button className={loginButtonClass + "fixed right-2"}>
               <a href="/login">Login</a>
             </button>
           )}

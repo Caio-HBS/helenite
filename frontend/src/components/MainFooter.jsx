@@ -9,7 +9,7 @@ export default function MainFooter() {
 
   return (
     <>
-      <footer className="bg-helenite-dark-grey text-helenite-light-blue p-2 bottom-0 w-full">
+      <footer className="bg-helenite-dark-grey text-helenite-light-blue p-2  w-full absolute">
         <div className="text-center">
           <Link
             to="/about-us"

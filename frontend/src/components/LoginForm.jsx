@@ -1,23 +1,64 @@
 import React, { useState } from "react";
-import { Form } from "react-router-dom";
+import { useNavigate, json } from "react-router-dom";
+import { loginActions } from "../store/login-slice";
+import { useDispatch } from "react-redux";
 
 export default function LoginForm() {
   const [showPassword, setShowPassowrd] = useState(false);
+  const [validation, setValidation] = useState(true);
 
-  const inputClass =
-    "p-1 focus:outline-none focus:border-0 focus:outline-helenite-light-blue";
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const fd = new FormData(event.target);
+    const data = Object.fromEntries(fd.entries());
+
+    const response = await fetch("http://localhost:8000/api/v1/login/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      setValidation(false);
+
+      return response;
+    }
+
+    const resData = await response.json();
+    const token = resData.token;
+
+    localStorage.setItem("token", token);
+
+    const expiration = new Date();
+    expiration.setHours(expiration.getHours() + 1);
+
+    localStorage.setItem("expiration", expiration.toISOString());
+
+    dispatch(loginActions.setLoginCredentials());
+
+    navigate("/feed");
+  }
 
   function showPasswordHandler() {
     setShowPassowrd((oldState) => !oldState);
   }
 
+  const inputClass =
+    "p-1 focus:outline-none focus:border-0 focus:outline-helenite-light-blue";
+
   return (
-    <Form
-      action="/login"
-      method="POST"
-      className="flex flex-col h-screen items-center justify-center"
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col h-screen items-center justify-center relative"
     >
-      <div className="text-center p-10 rounded-md bg-helenite-dark-grey shadow-2xl">
+      <div className="text-center p-10 rounded-md bg-helenite-dark-grey shadow-md shadow-stone-900">
         <div className="flex">
           <input
             type="text"
@@ -47,7 +88,12 @@ export default function LoginForm() {
             Show password
           </button>
         </div>
+        {!validation && (
+          <p className="text-left pt-1 pb-0 text-red-600">
+            Username or password invalid.
+          </p>
+        )}
       </div>
-    </Form>
+    </form>
   );
 }
