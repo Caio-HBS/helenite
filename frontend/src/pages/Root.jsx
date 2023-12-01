@@ -8,11 +8,11 @@ import MainNavigation from "../components/MainNavigationBar.jsx";
 import MainFooter from "../components/MainFooter.jsx";
 
 export default function RootLayout() {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(loginActions.setLoginCredentials());
-  // }, []);
+  useEffect(() => {
+    dispatch(loginActions.setLoginCredentials());
+  }, []);
 
   return (
     <>

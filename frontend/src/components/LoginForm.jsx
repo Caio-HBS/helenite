@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate, json } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { loginActions } from "../store/login-slice";
 import { useDispatch } from "react-redux";
+
+const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
 export default function LoginForm() {
   const [showPassword, setShowPassowrd] = useState(false);
@@ -17,7 +19,11 @@ export default function LoginForm() {
     const fd = new FormData(event.target);
     const data = Object.fromEntries(fd.entries());
 
-    const response = await fetch("http://localhost:8000/api/v1/login/", {
+    if (data.password.length < 8) {
+      setValidation(false);
+    }
+
+    const response = await fetch(`${backendURL}/api/v1/login/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
