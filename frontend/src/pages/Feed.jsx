@@ -1,8 +1,8 @@
 import React from "react";
-import { useDispatch } from "react-redux";
-
-import { loginActions } from "../store/login-slice.jsx";
 import { Helmet } from "react-helmet";
+
+import FeedComponent from "../components/Feed.jsx";
+import ParticlesComponent from "../components/Particles.jsx";
 
 export default function FeedPage() {
   return (
@@ -10,6 +10,12 @@ export default function FeedPage() {
       <Helmet>
         <title>Helenite | Feed</title>
       </Helmet>
+      <div>
+        <div className="pt-16">
+
+          <FeedComponent />
+        </div>
+      </div>
     </>
   );
 }
