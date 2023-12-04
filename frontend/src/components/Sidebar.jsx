@@ -1,24 +1,32 @@
 import React from "react";
-
-import defaultPFP from "../../../backend/uploads/profile_pictures/default_pfp.png"; //TODO: change this.
+import { useSelector, useDispatch } from "react-redux";
+import { userInfoActions } from "../store/user-info-slice";
 
 export default function Sidebar() {
-  const buttonClass = "m-1 p-2 rounded-2xl bg-helenite-green hover:text-red-500 hover:underline"; //TODO: change this.
+  const profilePicture = useSelector((state) => state.userInfo.pfp);
+  const username = useSelector((state) => state.userInfo.username);
+  const fullName = useSelector((state) => state.userInfo.fullname);
+
+  const dispatch = useDispatch();
+  dispatch(userInfoActions.setUserInfo());
+
+  const buttonClass =
+    "m-1 p-2 rounded-2xl bg-helenite-light-blue hover:text-helenite-white hover:bg-helenite-dark-blue hover:underline";
 
   return (
     <div className="fixed h-full flex items-center justify-center">
-      <div className="bg-gray-200 p-4 ml-4 rounded-md shadow-black shadow-sm">
+      <div className="bg-helenite-light-grey p-4 ml-4 rounded-md shadow-black shadow-sm">
         <a href="#">
           <div className="p-2">
             <img
-              src={defaultPFP}
+              src={profilePicture}
               alt="authenticated user profile picture"
-              className="rounded-full w-20 h-20"
+              className="rounded-full w-20 h-20 mx-auto object-cover"
             />
           </div>
-          <div className="text-center hover:underline">
-            <h2 className="">Caio Bianchi</h2>
-            <p className="">@caiohbs</p>
+          <div className="text-center text-helenite-white hover:underline">
+            <h2>{username}</h2>
+            <p>@{fullName}</p>
           </div>
         </a>
         <ul className="text-center">

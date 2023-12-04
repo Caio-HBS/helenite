@@ -12,27 +12,41 @@ import ErrorPage from "./pages/Error.jsx";
 import LoginPage from "./pages/Login.jsx";
 import HomePage from "./pages/Home.jsx";
 import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
+import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
 
 const router = createBrowserRouter([
   {
+    // Unprotected.
     path: "/",
     element: <RootLayout />,
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "/login", element: <LoginPage /> },
-      { path: "/register", element: <Register /> },
-      { path: "/about-us", element: <AboutUsPage /> },
-      { path: "/post/:postId", element: <PostDetailPage /> },
-      { path: "/profile/:username", element: <ProfileDetailPage /> },
-      { path: "/profile/:username/settings", element: <SettingsPage /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "register", element: <Register /> },
+      { path: "about-us", element: <AboutUsPage /> },
     ],
   },
   {
     path: "/feed",
-    element: <RootLayout />,
+    element: <ProtectedRoutes />,
     errorElement: <ErrorPage />,
     children: [{ index: true, element: <FeedPage />, loader: feedLoader }],
+  },
+  {
+    path: "/profile",
+    element: <ProtectedRoutes />,
+    errorElement: <ErrorPage />,
+    children: [
+      { path: ":username", element: <ProfileDetailPage /> },
+      { path: ":username/settings", element: <SettingsPage /> },
+    ],
+  },
+  {
+    path: "/post",
+    element: <ProtectedRoutes />,
+    errorElement: <ErrorPage />,
+    children: [{ path: ":postId", element: <PostDetailPage /> }],
   },
 ]);
 

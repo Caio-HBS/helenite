@@ -1,20 +1,9 @@
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 
 import ParticlesComponent from "../components/Particles.jsx";
 
 export default function HomePage() {
-  const navigate = useNavigate();
-
-  const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/login");
-    }
-  }, []);
-
   const buttonClass =
     "bg-helenite-light-blue hover:bg-helenite-dark-blue hover:text-helenite-white rounded-md p-2";
 

@@ -5,25 +5,25 @@ import { useSelector, useDispatch } from "react-redux";
 import { loginActions } from "../store/login-slice.jsx";
 
 import MainNavigation from "../components/MainNavigationBar.jsx";
-import MainFooter from "../components/MainFooter.jsx";
+import MainFooter from "./MainFooter.jsx";
 
-export default function RootLayout() {
+export default function ProtectedRoutes() {
   const dispatch = useDispatch();
   dispatch(loginActions.setLoginCredentials());
 
   const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
 
   if (isLoggedIn) {
-    return <Navigate to="/feed" />;
+    return (
+      <>
+        <MainNavigation />
+        <main>
+          <Outlet />
+        </main>
+        <MainFooter />
+      </>
+    );
   }
 
-  return (
-    <>
-      <MainNavigation />
-      <main>
-        <Outlet />
-      </main>
-      {/* <MainFooter /> */}
-    </>
-  );
+  return <Navigate to="/login" />;
 }

@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 import HeleniteFullLogo from "/helenite_full_logo.png";
 import { loginActions } from "../store/login-slice.jsx";
+import { userInfoActions } from "../store/user-info-slice.jsx";
 
 export default function MainNavigationBar() {
   const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
@@ -18,6 +19,12 @@ export default function MainNavigationBar() {
 
     dispatch(loginActions.logout());
 
+    localStorage.removeItem("user-fullname");
+    localStorage.removeItem("user-username");
+    localStorage.removeItem("user-pfp");
+
+    dispatch(userInfoActions.logout());
+
     navigate("/");
   }
 
@@ -30,7 +37,7 @@ export default function MainNavigationBar() {
         <div>
           <ul className="text-helenite-light-blue flex">
             <li>
-              <Link to="/">
+              <Link to="/login">
                 <img
                   src={HeleniteFullLogo}
                   alt="A green gem with 'Helenite' written by its side"
@@ -61,7 +68,7 @@ export default function MainNavigationBar() {
             </button>
           ) : (
             <button className={loginButtonClass + "fixed right-2"}>
-              <a href="/login">Login</a>
+              <a href="login">Login</a>
             </button>
           )}
         </div>

@@ -1,24 +1,10 @@
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import { Helmet } from "react-helmet";
 
 import LoginForm from "../components/LoginForm.jsx";
 import ParticlesComponent from "../components/Particles.jsx";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-
-  const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (isLoggedIn) {
-        navigate("/feed");
-      }
-    }, 1000); //TODO: resolve this loop.
-  }, []);
-
   return (
     <>
       <Helmet>
