@@ -11,7 +11,7 @@ import RootLayout from "./pages/Root.jsx";
 import ErrorPage from "./pages/Error.jsx";
 import LoginPage from "./pages/Login.jsx";
 import HomePage from "./pages/Home.jsx";
-import FeedPage from "./pages/Feed.jsx";
+import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +32,7 @@ const router = createBrowserRouter([
     path: "/feed",
     element: <RootLayout />,
     errorElement: <ErrorPage />,
-    children: [{ index: true, element: <FeedPage /> }],
+    children: [{ index: true, element: <FeedPage />, loader: feedLoader }],
   },
 ]);
 

@@ -12,9 +12,11 @@ export default function LoginPage() {
   const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
 
   useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/feed");
-    }
+    setTimeout(() => {
+      if (isLoggedIn) {
+        navigate("/feed");
+      }
+    }, 1000); //TODO: resolve this loop.
   }, []);
 
   return (
