@@ -22,6 +22,7 @@ export default function MainNavigationBar() {
     localStorage.removeItem("user-fullname");
     localStorage.removeItem("user-username");
     localStorage.removeItem("user-pfp");
+    localStorage.removeItem("user-pk");
 
     dispatch(userInfoActions.logout());
 
