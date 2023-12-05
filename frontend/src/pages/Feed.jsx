@@ -1,14 +1,11 @@
 import React from "react";
 import { Helmet } from "react-helmet";
-import { useSelector } from "react-redux";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
 import FeedComponent from "../components/Feed.jsx";
 
 export default function FeedPage() {
-  // const token = useSelector(state.login.token);
-
   return (
     <>
       <Helmet>
@@ -16,7 +13,7 @@ export default function FeedPage() {
       </Helmet>
       <div>
         <div className="pt-16 bg-stone-800 h-fit">
-          <FeedComponent />
+          <FeedComponent newPostComponent={true} />
         </div>
       </div>
     </>
@@ -24,11 +21,13 @@ export default function FeedPage() {
 }
 
 export async function loader() {
+  const token = localStorage.getItem("token");
+
   const response = await fetch(`${backendURL}/api/v1/feed/`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer 6cfa6de9e61a5c3ee43c56227cfa15a55797f833`,
+      Authorization: `Bearer ${token}`,
     },
   });
 

@@ -1,35 +1,23 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate, useLoaderData } from "react-router-dom";
-import { useSelector } from "react-redux";
+import React from "react";
+import { Link, useLoaderData } from "react-router-dom";
 
 import Sidebar from "./Sidebar.jsx";
 import TransformDate from "./TransformDate.jsx";
+import NewPost from "./NewPost.jsx";
 
-export default function FeedComponent() {
-  const navigate = useNavigate();
-
-  const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
-
+export default function FeedComponent({ newPostComponent }) {
   const response = useLoaderData();
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/login");
-    }
-  }, []);
-  // TODO: link to profile.
-  // TODO: link to post.
-
-  // TODO: areatext for new post.
   return (
     <>
       <div className="flex h-screen">
         <Sidebar />
-        <div className="flex-1 p-4 flex ml-52">
+        <div className="flex-1 p-4 flex mx-52">
           <div
             id="posts-container"
             className="bg-helenite-dark-grey rounded-md items-start p-4"
           >
+            {newPostComponent && <NewPost />}
             {response.results.map((post) => (
               <div
                 id="single-post-container"
@@ -37,14 +25,14 @@ export default function FeedComponent() {
                 key={post.endpoint}
               >
                 <div id="post-header" className="flex">
-                  <Link to="#">
+                  <Link to={`/profile/${post.profile.username}`}>
                     <img
                       src={post.profile.pfp}
                       className="rounded-full w-20 h-20 object-cover"
                     />
                   </Link>
                   <div id="name-username" className="m-1">
-                    <Link to="#">
+                    <Link to={`/profile/${post.profile.username}`}>
                       <h2 className="hover:underline text-lg">
                         <strong>{post.profile.get_full_name}</strong>
                       </h2>
@@ -54,11 +42,11 @@ export default function FeedComponent() {
                   </div>
                 </div>
 
-                <Link to="#">
+                <Link to={`/post/${post.endpoint.slice(21, -1)}`}>
                   <div id="post-info">
                     <img
                       src={post.post_image}
-                      className="w-full h-full object-contain rounded-lg my-2 mr-2"
+                      className=" rounded-lg my-2 mr-2"
                     />
                     <p className="ml-1 text-justify">{post.post_text}</p>
                   </div>

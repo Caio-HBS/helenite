@@ -27,6 +27,7 @@ const router = createBrowserRouter([
       { path: "about-us", element: <AboutUsPage /> },
     ],
   },
+  // Protected.
   {
     path: "/feed",
     element: <ProtectedRoutes />,
