@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginActions } from "../store/login-slice";
 import { useDispatch } from "react-redux";
+
+import { loginActions } from "../store/login-slice.jsx";
+import { userInfoActions } from "../store/user-info-slice.jsx";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
@@ -44,10 +46,32 @@ export default function LoginForm() {
 
     const expiration = new Date();
     expiration.setHours(expiration.getHours() + 1);
-
     localStorage.setItem("expiration", expiration.toISOString());
 
     dispatch(loginActions.setLoginCredentials());
+
+    const userInfoRes = await fetch(
+      `${backendURL}/api/v1/profile/${data.username}/`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!userInfoRes.ok) {
+      return response; //TODO: this.
+    }
+
+    const userInfoResData = await userInfoRes.json();
+
+    localStorage.setItem("user-fullname", userInfoResData.get_full_name);
+    localStorage.setItem("user-username", userInfoResData.username);
+    localStorage.setItem("user-pfp", userInfoResData.pfp);
+
+    dispatch(userInfoActions.setUserInfo());
 
     navigate("/feed");
   }

@@ -25,8 +25,8 @@ export default function Sidebar() {
             />
           </div>
           <div className="text-center text-helenite-white hover:underline">
-            <h2>{username}</h2>
-            <p>@{fullName}</p>
+            <h2><strong>{fullName}</strong></h2>
+            <p>@{username}</p>
           </div>
         </a>
         <ul className="text-center">
