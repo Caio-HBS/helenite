@@ -10,7 +10,7 @@ export default function FeedComponent({ newPostComponent }) {
 
   return (
     <>
-      <div className="flex h-screen">
+      <div className="flex h-full">
         <Sidebar />
         <div className="flex-1 p-4 flex mx-52">
           <div
@@ -41,12 +41,11 @@ export default function FeedComponent({ newPostComponent }) {
                     <TransformDate date={post.post_publication_date} />
                   </div>
                 </div>
-
                 <Link to={`/post/${post.endpoint.slice(21, -1)}`}>
                   <div id="post-info">
                     <img
                       src={post.post_image}
-                      className=" rounded-lg my-2 mr-2"
+                      className="max-w-2xl object-cover rounded-lg my-2 mr-2"
                     />
                     <p className="ml-1 text-justify">{post.post_text}</p>
                   </div>

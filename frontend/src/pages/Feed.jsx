@@ -12,7 +12,7 @@ export default function FeedPage() {
         <title>Helenite | Feed</title>
       </Helmet>
       <div>
-        <div className="pt-16 bg-stone-800 h-fit">
+        <div className="pt-16 bg-stone-800">
           <FeedComponent newPostComponent={true} />
         </div>
       </div>

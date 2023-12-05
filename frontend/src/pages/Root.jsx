@@ -23,7 +23,7 @@ export default function RootLayout() {
       <main>
         <Outlet />
       </main>
-      {/* <MainFooter /> */}
+      <MainFooter />
     </>
   );
 }

@@ -8,7 +8,6 @@ export default function MainFooter() {
   const linkedInLink = "https://www.linkedin.com/in/caio-bianchi-94aa62206/";
 
   return (
-    //TODO: fix this component.
     <>
       <footer className="bg-helenite-dark-grey text-helenite-light-blue p-2 ">
         <div className="text-center">
