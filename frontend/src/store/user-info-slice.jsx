@@ -17,9 +17,13 @@ const userInfoSlice = createSlice({
     },
     logout(state) {
       state.fullname = "";
+      localStorage.removeItem("user-fullname");
       state.username = "";
+      localStorage.removeItem("user-username");
       state.pfp = "";
+      localStorage.removeItem("user-pfp");
       state.userPK = "";
+      localStorage.removeItem("user-pk");
     },
   },
 });

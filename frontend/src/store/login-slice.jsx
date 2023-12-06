@@ -15,7 +15,9 @@ const loginSlice = createSlice({
     },
     logout(state) {
       state.isLoggedIn = false;
+      localStorage.removeItem("token");
       state.token = null;
+      localStorage.removeItem("expiration");
       state.expirationDate = null;
     },
   },
