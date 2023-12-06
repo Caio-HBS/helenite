@@ -18,7 +18,7 @@ export default function MainFooter() {
             About us
           </Link>
           <p>
-            Helenite is a social media built as an exercise of fullstack
+            Helenite is a social network built as an exercise of fullstack
             development. Complete with a React.js front-end, a Django/DjangoDRF
             back-end, a Postgres database, and a CI/CD workflow for deployment
             powered by Github Actions and a search engine provided by Algolia,
