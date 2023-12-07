@@ -28,7 +28,7 @@ export default function MainNavigationBar() {
     });
 
     if (!response.ok) {
-      // TODO: this.
+      // TODO: fix bad request on logout.
     }
 
     dispatch(loginActions.logout());

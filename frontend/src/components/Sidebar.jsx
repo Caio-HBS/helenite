@@ -14,6 +14,8 @@ export default function Sidebar() {
     "m-1 p-2 rounded-2xl bg-helenite-light-blue hover:text-helenite-white hover:bg-helenite-dark-blue hover:underline";
 
   return (
+    // TODO: add routing.
+
     <div className="fixed h-full flex items-center justify-center">
       <div className="bg-helenite-light-grey p-4 ml-4 rounded-md shadow-black shadow-sm">
         <a href="#">

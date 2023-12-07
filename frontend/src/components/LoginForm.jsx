@@ -62,7 +62,7 @@ export default function LoginForm() {
     );
 
     if (!userInfoRes.ok) {
-      return response; //TODO: this.
+      return response; //TODO: fix bad request on login.
     }
 
     const userInfoResData = await userInfoRes.json();

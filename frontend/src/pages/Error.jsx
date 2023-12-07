@@ -22,7 +22,9 @@ export default function ErrorPage() {
             id="main-element"
             className="flex flex-col h-screen items-start py-24 px-8 text-helenite-white"
           >
-            <h1 className="text-7xl"><strong>404 Error:</strong> page not found :(</h1>
+            <h1 className="text-7xl">
+              <strong>404 Error:</strong> page not found :(
+            </h1>
           </div>
         </div>
         <MainFooter />

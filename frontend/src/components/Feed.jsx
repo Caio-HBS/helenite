@@ -9,6 +9,8 @@ export default function FeedComponent({ newPostComponent }) {
   const response = useLoaderData();
 
   return (
+    // TODO: add like button.
+
     <>
       <div className="flex min-h-screen h-full">
         <Sidebar />

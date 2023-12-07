@@ -15,6 +15,8 @@ export default function RegisterForm() {
   const divClass = "py-1";
 
   return (
+    // TODO: add functionality and validation.
+
     <>
       <form className="flex flex-col h-screen items-center justify-center relative">
         <div className="text-left p-10 rounded-md bg-helenite-dark-grey shadow-md shadow-stone-900">

@@ -43,7 +43,7 @@ export default function NewPost() {
       });
 
       if (!response.ok) {
-        return response; // TODO: this.
+        return response; // TODO: fix bad request on new post creation.
       }
 
       navigate(0);
@@ -69,6 +69,8 @@ export default function NewPost() {
   }
 
   return (
+    // TODO: add Discover page button.
+
     <form id="new-post" className="p-2" onSubmit={handleSubmitNewPost}>
       <textarea
         placeholder="What's on my mind?"
