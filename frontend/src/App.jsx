@@ -2,6 +2,9 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
+import DiscoverPage, { loader as discoverLoader } from "./pages/Discover.jsx";
+import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
+import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
 import ProfileDetailPage from "./pages/ProfileDetail.jsx";
 import PostDetailPage from "./pages/PostDetail.jsx";
 import SettingsPage from "./pages/Settings.jsx";
@@ -11,8 +14,6 @@ import RootLayout from "./pages/Root.jsx";
 import ErrorPage from "./pages/Error.jsx";
 import LoginPage from "./pages/Login.jsx";
 import HomePage from "./pages/Home.jsx";
-import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
-import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +33,10 @@ const router = createBrowserRouter([
     path: "/feed",
     element: <ProtectedRoutes />,
     errorElement: <ErrorPage />,
-    children: [{ index: true, element: <FeedPage />, loader: feedLoader }],
+    children: [
+      { index: true, element: <FeedPage />, loader: feedLoader },
+      { path: "discover", element: <DiscoverPage />, loader: discoverLoader },
+    ],
   },
   {
     path: "/profile",

@@ -10,7 +10,7 @@ export default function FeedComponent({ newPostComponent }) {
 
   return (
     <>
-      <div className="flex h-full">
+      <div className="flex min-h-screen h-full">
         <Sidebar />
         <div className="flex-1 p-4 flex mx-52">
           <div
