@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import { loginActions } from "../store/login-slice.jsx";
-import { userInfoActions } from "../store/user-info-slice.jsx";
+import { loginActions } from "../store/login-slice.js";
+import { userInfoActions } from "../store/user-info-slice.js";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 

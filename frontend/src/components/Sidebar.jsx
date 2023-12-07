@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { userInfoActions } from "../store/user-info-slice";
+
+import { userInfoActions } from "../store/user-info-slice.js";
 
 export default function Sidebar() {
   const profilePicture = useSelector((state) => state.userInfo.pfp);

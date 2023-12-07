@@ -2,9 +2,10 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
+import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
+
 import DiscoverPage, { loader as discoverLoader } from "./pages/Discover.jsx";
 import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
-import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
 import ProfileDetailPage from "./pages/ProfileDetail.jsx";
 import PostDetailPage from "./pages/PostDetail.jsx";
 import SettingsPage from "./pages/Settings.jsx";

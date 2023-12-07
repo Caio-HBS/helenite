@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
-import { loginActions } from "../store/login-slice.jsx";
+import { loginActions } from "../store/login-slice.js";
 
 import MainNavigation from "../components/MainNavigationBar.jsx";
 import MainFooter from "./MainFooter.jsx";
