@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet";
 import ParticlesComponent from "../components/Particles.jsx";
 
 export default function AboutUsPage() {
-  // BUG: when logged-in, user is automatically redirected to feed.
   const h2Class = "text-2xl py-3 text-helenite-light-blue";
   const pClass = "text-lg py-2";
   const aClass = "underline hover:text-helenite-green";
