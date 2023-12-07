@@ -54,7 +54,7 @@ export default function MainNavigationBar() {
         <div>
           <ul className="text-helenite-light-blue flex">
             <li>
-              <Link to="/login">
+              <Link to="/">
                 <img
                   src={HeleniteFullLogo}
                   alt="A green gem with 'Helenite' written by its side"

@@ -1,13 +1,22 @@
 import React from "react";
 import { Helmet } from "react-helmet";
 
+import ParticlesComponent from "../components/Particles.jsx";
+import RegisterForm from "../components/RegisterForm.jsx";
+
 export default function RegisterPage() {
   return (
     <>
       <Helmet>
         <title>Helenite | Register</title>
       </Helmet>
-      <h1>Register page!</h1>
+      <div>
+        <div className="pt-16">
+          <ParticlesComponent />
+
+          <RegisterForm />
+        </div>
+      </div>
     </>
   );
 }
