@@ -1,10 +1,11 @@
-import React, { Component } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
 import TransformDate from "./TransformDate.jsx";
+import NewComment from "./NewComment.jsx";
 import Sidebar from "./Sidebar.jsx";
 
 export default function SinglePost() {
@@ -38,12 +39,26 @@ export default function SinglePost() {
     navigate(0);
   }
 
-  async function handleSubmitComment() {
-    // TODO: add functionality for post comment.
-  }
+  async function handleDeletePost(event) {
+    event.preventDefault();
 
-  async function handleDeletePost() {
-    // TODO: add functionality for post deletion.
+    const fetchDeleteResponse = await fetch(
+      `${backendURL}${response.endpoint}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!fetchDeleteResponse.ok) {
+      // TODO: fix bad request on post delete.
+    }
+
+    const resData = await fetchDeleteResponse.json();
+    navigate("/feed");
   }
 
   return (
@@ -55,6 +70,16 @@ export default function SinglePost() {
             id="posts-container"
             className="bg-helenite-dark-grey rounded-md items-start p-4 min-w-full"
           >
+            {currentUser === response.profile.username && (
+              <form
+                className="text-right px-2"
+                onSubmit={(event) => handleDeletePost(event)}
+              >
+                <button className="rounded-sm p-1 bg-red-600 hover:bg-red-800 text-helenite-white">
+                  <strong>Delete post</strong>
+                </button>
+              </form>
+            )}
             {
               <div
                 id="single-post-container"
@@ -116,10 +141,10 @@ export default function SinglePost() {
                   >
                     <div
                       id="single-comment"
-                      className="flex p-2 my-2 w-fit rounded-lg bg-helenite-light-grey"
+                      className="flex p-2 my-2 w-fit rounded-lg text-justify max-w-screen-2xl bg-helenite-light-grey"
                     >
                       <h3 className="text-xl text-helenite-light-blue hover:underline">
-                        <strong>{comment.comment_user}:</strong>
+                        <strong>@{comment.comment_user}:</strong>
                       </h3>
                       <p className="text-lg ml-2 text-helenite-white">
                         {comment.comment_text}
@@ -132,7 +157,12 @@ export default function SinglePost() {
                   There are no comments here yet.
                 </p>
               )}
-              // TODO: add new comment.
+              <NewComment
+                navigate={navigate}
+                currentUser={currentUser}
+                token={token}
+                endpoint={response.endpoint}
+              />
             </div>
           </div>
         </div>

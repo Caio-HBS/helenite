@@ -77,7 +77,9 @@ export default function FeedComponent({ newPostComponent }) {
                       src={post.post_image}
                       className="max-w-2xl object-cover rounded-lg my-2 mr-2"
                     />
-                    <p className="ml-1 text-justify">{post.post_text}</p>
+                    <p className="ml-1 text-justify max-w-screen-2xl">
+                      {post.post_text}
+                    </p>
                   </div>
                 </Link>
                 <div id="post-likes-comments" className="ml-1 flex">
