@@ -4,10 +4,12 @@ import { Helmet } from "react-helmet";
 
 import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
 
+import PostDetailPage, {
+  loader as postDetailLoader,
+} from "./pages/PostDetail.jsx";
 import DiscoverPage, { loader as discoverLoader } from "./pages/Discover.jsx";
 import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
 import ProfileDetailPage from "./pages/ProfileDetail.jsx";
-import PostDetailPage from "./pages/PostDetail.jsx";
 import SettingsPage from "./pages/Settings.jsx";
 import AboutUsPage from "./pages/AboutUs.jsx";
 import Register from "./pages/Register.jsx";
@@ -52,7 +54,13 @@ const router = createBrowserRouter([
     path: "/post",
     element: <ProtectedRoutes />,
     errorElement: <ErrorPage />,
-    children: [{ path: ":postId", element: <PostDetailPage /> }],
+    children: [
+      {
+        path: ":postId",
+        element: <PostDetailPage />,
+        loader: postDetailLoader,
+      },
+    ],
   },
 ]);
 

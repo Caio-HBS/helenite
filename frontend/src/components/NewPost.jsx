@@ -84,7 +84,7 @@ export default function NewPost() {
         <div className="pt-3">
           <button
             type="button"
-            className="rounded-sm p-1 bg-helenite-light-blue hover:bg-helenite-dark-blue hover:text-helenite-white"
+            className="rounded-sm p-1 bg-helenite-light-blue hover:bg-helenite-green"
             onClick={handleDiscover}
           >
             Discover new posts
