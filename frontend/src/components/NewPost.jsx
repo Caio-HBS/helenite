@@ -68,9 +68,11 @@ export default function NewPost() {
     }
   }
 
-  return (
-    // TODO: add Discover page button.
+  function handleDiscover() {
+    navigate("discover");
+  }
 
+  return (
     <form id="new-post" className="p-2" onSubmit={handleSubmitNewPost}>
       <textarea
         placeholder="What's on my mind?"
@@ -78,21 +80,32 @@ export default function NewPost() {
         onChange={(event) => setTextAreaContent(event.target.value)}
         className="flex w-full h-28 resize-none rounded-lg bg-helenite-light-grey text-helenite-white focus:outline-none focus:border-0 focus:outline-helenite-light-blue"
       />
-      <div className="text-right pt-3">
-        <input
-          type="file"
-          id="input_image"
-          name="post_image"
-          accept="image"
-          className="hidden"
-          onChange={(event) => handleAddImage(event.target.files)}
-        />
-        <label htmlFor="input_image" className={addImageButtonClass}>
-          {fileButtonValue}
-        </label>
-        <button className="rounded-sm p-1 bg-helenite-light-blue text-stone-800 hover:text-helenite-white hover:bg-helenite-dark-blue">
-          New Post
-        </button>
+      <div className="flex justify-between items-center">
+        <div className="pt-3">
+          <button
+            type="button"
+            className="rounded-sm p-1 bg-helenite-light-blue hover:bg-helenite-dark-blue hover:text-helenite-white"
+            onClick={handleDiscover}
+          >
+            Discover new posts
+          </button>
+        </div>
+        <div className="pt-3">
+          <input
+            type="file"
+            id="input_image"
+            name="post_image"
+            accept="image"
+            className="hidden"
+            onChange={(event) => handleAddImage(event.target.files)}
+          />
+          <label htmlFor="input_image" className={addImageButtonClass}>
+            {fileButtonValue}
+          </label>
+          <button className="rounded-sm p-1 bg-helenite-light-blue text-stone-800 hover:text-helenite-white hover:bg-helenite-dark-blue">
+            New Post
+          </button>
+        </div>
       </div>
     </form>
   );

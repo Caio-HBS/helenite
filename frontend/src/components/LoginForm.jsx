@@ -7,9 +7,12 @@ import { userInfoActions } from "../store/user-info-slice.js";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
+import LoadingButton from "./LoadingButton.jsx";
+
 export default function LoginForm() {
   const [showPassword, setShowPassowrd] = useState(false);
   const [validation, setValidation] = useState(true);
+  const [sendingRequest, setSendingRequest] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -24,7 +27,7 @@ export default function LoginForm() {
     if (data.password.length < 8) {
       setValidation(false);
     }
-
+    setSendingRequest(true);
     const response = await fetch(`${backendURL}/api/v1/login/`, {
       method: "POST",
       headers: {
@@ -35,6 +38,7 @@ export default function LoginForm() {
 
     if (!response.ok) {
       setValidation(false);
+      setSendingRequest(false);
 
       return response;
     }
@@ -62,6 +66,9 @@ export default function LoginForm() {
     );
 
     if (!userInfoRes.ok) {
+      setValidation(false);
+      setSendingRequest(false);
+
       return response; //TODO: fix bad request on login.
     }
 
@@ -73,6 +80,7 @@ export default function LoginForm() {
 
     dispatch(userInfoActions.setUserInfo());
 
+    setSendingRequest(false);
     navigate("/feed");
   }
 
@@ -97,9 +105,19 @@ export default function LoginForm() {
             className={inputClass}
             required
           />
-          <button className="rounded-md m-auto px-6 py-1 bg-helenite-light-blue text-stone-500 hover:bg-helenite-dark-blue hover:text-helenite-white">
-            Login
-          </button>
+          {!sendingRequest && (
+            <button className="rounded-md m-auto px-6 py-1 bg-helenite-light-blue text-stone-500 hover:bg-helenite-dark-blue hover:text-helenite-white">
+              Login
+            </button>
+          )}
+          {sendingRequest && (
+            <LoadingButton
+              buttonColor="bg-helenite-light-blue"
+              buttonText="Wait"
+              textColor="text-stone-800"
+              padding="px-5 py-1 text-sm"
+            />
+          )}
         </div>
         <div className="mt-2 text-helenite-dark-grey">
           <input

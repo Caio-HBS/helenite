@@ -1,16 +1,44 @@
 import React from "react";
-import { Link, useLoaderData } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
 import Sidebar from "./Sidebar.jsx";
 import TransformDate from "./TransformDate.jsx";
 import NewPost from "./NewPost.jsx";
 
 export default function FeedComponent({ newPostComponent }) {
+  // BUG: user loses scroll position on like.
+  const token = localStorage.getItem("token");
+
+  const navigate = useNavigate();
+  const currentUser = useSelector((state) => state.userInfo.username);
   const response = useLoaderData();
 
-  return (
-    // TODO: add like button.
+  async function handleLike(event, endpoint) {
+    event.preventDefault();
 
+    const response = await fetch(`${backendURL}/api/v1/feed/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        post_slug: `${endpoint}`,
+      }),
+    });
+
+    if (!response.ok) {
+      // TODO: fix bad request on like.
+      return response;
+    }
+
+    navigate(0);
+  }
+
+  return (
     <>
       <div className="flex min-h-screen h-full">
         <Sidebar />
@@ -51,19 +79,33 @@ export default function FeedComponent({ newPostComponent }) {
                     />
                     <p className="ml-1 text-justify">{post.post_text}</p>
                   </div>
-                  <div
-                    id="post-likes-comments"
-                    className="ml-1 flex hover:underline"
+                </Link>
+                <div id="post-likes-comments" className="ml-1 flex">
+                  <form
+                    onSubmit={(event) =>
+                      handleLike(event, post.endpoint.slice(21, -1))
+                    }
                   >
-                    <p>
-                      {post.likes_count} like{post.likes_count > 1 ? "s" : ""}
-                    </p>
-                    <p className="ml-2">
+                    <button
+                      className={
+                        post.likes.includes(currentUser)
+                          ? "text-helenite-green hover:text-white hover:underline"
+                          : "hover:text-helenite-green hover:underline"
+                      }
+                    >
+                      <strong>
+                        {post.likes_count} like{post.likes_count > 1 ? "s" : ""}
+                      </strong>
+                    </button>
+                  </form>
+                  <p className="ml-1"> &#9830;</p>
+                  <Link to={`/post/${post.endpoint.slice(21, -1)}`}>
+                    <p className="ml-1">
                       {post.comments_count} comment
                       {post.comments_count > 1 ? "s" : ""}
                     </p>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
