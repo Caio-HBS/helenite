@@ -12,6 +12,7 @@ import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
 import ProfileDetailPage from "./pages/ProfileDetail.jsx";
 import SettingsPage from "./pages/Settings.jsx";
 import AboutUsPage from "./pages/AboutUs.jsx";
+import SearchPage, { loader as searchLoader } from "./pages/Search.jsx";
 import Register from "./pages/Register.jsx";
 import RootLayout from "./pages/Root.jsx";
 import ErrorPage from "./pages/Error.jsx";
@@ -61,6 +62,12 @@ const router = createBrowserRouter([
         loader: postDetailLoader,
       },
     ],
+  },
+  {
+    path: "/search",
+    element: <ProtectedRoutes />,
+    errorElement: <ErrorPage />,
+    children: [{ index: true, element: <SearchPage />, loader: searchLoader }],
   },
 ]);
 
