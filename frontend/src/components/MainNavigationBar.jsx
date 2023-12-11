@@ -17,8 +17,19 @@ export default function MainNavigationBar() {
 
   const navigate = useNavigate();
 
+  const token = localStorage.getItem("token");
+
+  function handleInputChange(event) {
+    // Prevents users from searching more than two words.
+    const value = event.target.value;
+    const words = value.split(" ");
+    const uniqueWords = [...new Set(words)].slice(0, 2);
+    const newValue = uniqueWords.join(" ");
+
+    setInputSearchValue(newValue);
+  }
+
   async function handleLogout() {
-    const token = localStorage.getItem("token");
     const response = await fetch(`${backendURL}/api/v1/logout/`, {
       method: "POST",
       headers: {
@@ -41,7 +52,11 @@ export default function MainNavigationBar() {
     event.preventDefault();
 
     if (inputSearchValue !== "") {
-      // TODO: this
+      const searchUrl = `/search?q=${encodeURIComponent(
+        inputSearchValue
+      )}`;
+
+      navigate(searchUrl);
     }
   }
 
@@ -74,6 +89,7 @@ export default function MainNavigationBar() {
                 type="text"
                 placeholder="I'm looking for..."
                 value={inputSearchValue}
+                onChange={handleInputChange}
                 className="bg-helenite-white text-helenite-dark-grey focus:outline-none focus:border-0 focus:outline-helenite-light-blue h-12"
               />
             </div>
