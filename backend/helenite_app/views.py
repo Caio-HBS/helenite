@@ -264,6 +264,7 @@ class SearchListView(generics.ListAPIView):
         return Response(self.get_serializer(search_results, many=True).data)
 
 
+# TODO: add "new friend" functionality.
 class ProfileRetriveAPIView(generics.RetrieveAPIView):
     """
     View to retrieve a single profile based on the custom_slug_profile.

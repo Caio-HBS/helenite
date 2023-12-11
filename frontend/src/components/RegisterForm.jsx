@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import LoadingButton from "./LoadingButton.jsx";
+
 export default function RegisterForm() {
   const [showPassword, setShowPassowrd] = useState(false);
   const [validation, setValidation] = useState(true);
@@ -11,11 +13,12 @@ export default function RegisterForm() {
 
   const inputClass =
     "w-full py-1 focus:outline-none focus:border-0 focus:outline-helenite-light-blue";
-  
+
   const divClass = "py-1";
 
   return (
-    // TODO: add functionality and validation.
+    // TODO: add functionality.
+    // TODO: implement validarotors.
 
     <>
       <form className="flex flex-col h-screen items-center justify-center relative">
@@ -47,14 +50,14 @@ export default function RegisterForm() {
             <input
               type="slug"
               name="custom_slug_profile"
-              placeholder="Path for your profile"
+              placeholder="Path for your profile (blank for username)"
               className={inputClass}
               required
             />
           </div>
           <div className={divClass}>
             <input
-              type="slug"
+              type="text"
               name="first_name"
               placeholder="Your First Name"
               className={inputClass}
@@ -63,7 +66,7 @@ export default function RegisterForm() {
           </div>
           <div className={divClass}>
             <input
-              type="slug"
+              type="text"
               name="last_name"
               placeholder="Your Last Name"
               className={inputClass}
@@ -140,9 +143,19 @@ export default function RegisterForm() {
             </p>
           )}
           <div className="pt-2 text-center">
-            <button className="p-2 text-xl rounded-lg bg-helenite-light-blue hover:bg-helenite-dark-blue hover:text-helenite-white">
-              Take me to Helenite!
-            </button>
+            {showPassword && (
+              <LoadingButton
+                buttonText="Loading..."
+                textColor="text-helenite-white"
+                buttonColor="bg-helenite-dark-blue"
+                padding="px-5 py-2.5 text-lg"
+              />
+            )}
+            {!showPassword && (
+              <button className="p-2 text-xl rounded-lg bg-helenite-light-blue hover:bg-helenite-dark-blue hover:text-helenite-white">
+                Take me to Helenite!
+              </button>
+            )}
           </div>
         </div>
       </form>
