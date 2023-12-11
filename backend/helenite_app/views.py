@@ -226,17 +226,11 @@ class SearchListView(generics.ListAPIView):
         index = self.request.GET.get("index", "Helenite_Profile")
 
         if not query or query == "":
-            return Response(
-                {"detail": "Query cannot be empty."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return None;
         if not index or index == "":
-            return Response(
-                {"detail": "Index cannot be empty."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return None;
         if index != "Helenite_Profile" and index != "Helenite_Post":
-            return Response(
-                {"detail": "Invalid index."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return None;
 
         results_from_algolia = client.perform_search(query, index)
 
