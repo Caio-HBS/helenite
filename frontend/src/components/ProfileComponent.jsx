@@ -4,7 +4,7 @@ import { useLoaderData } from "react-router-dom";
 import ProfileHeader from "./ProfileHeader.jsx";
 import ProfileFeed from "./ProfileFeed.jsx";
 
-export default function FeedForProfile() {
+export default function ProfileComponent() {
   const response = useLoaderData();
 
   return (

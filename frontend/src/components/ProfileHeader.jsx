@@ -15,7 +15,10 @@ export default function ProfileHeader() {
 
   return (
     <div className="flex flex-col items-center justify-center mx-40 m-5 rounded-lg bg-helenite-dark-grey">
-      <img src={response.pfp} className="w-60 h-60 rounded-full object-cover" />
+      <img
+        src={response.pfp}
+        className="w-60 h-60 pt-2 rounded-full object-cover"
+      />
       <div>
         <h2 className="text-4xl pt-2 text-helenite-light-blue">
           <strong>{response.get_full_name}</strong>

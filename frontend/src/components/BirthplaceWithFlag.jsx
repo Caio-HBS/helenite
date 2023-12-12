@@ -9,7 +9,7 @@ export default function BirthplaceWithFlag({ birth_place }) {
     const countryEmoji = [countryCode].map(countryCodeEmoji);
 
     return (
-      <p className="text-center text-helenite-white">
+      <p className="text-center pb-2 text-helenite-white">
         From: {birth_place + " " + countryEmoji}
       </p>
     );

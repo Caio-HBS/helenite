@@ -3,7 +3,7 @@ import Helmet from "react-helmet";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
-import FeedForProfile from "../components/FeedForProfile.jsx";
+import ProfileComponent from "../components/ProfileComponent.jsx";
 
 export default function ProfileDetailPage() {
   return (
@@ -12,8 +12,8 @@ export default function ProfileDetailPage() {
         <title>Helenite | Profile</title>
       </Helmet>
       <div>
-        <div className="pt-16 min-h-screen bg-stone-800">
-          <FeedForProfile />
+        <div className="pt-16 h-full pb-4 bg-stone-800">
+          <ProfileComponent />
         </div>
       </div>
     </>
