@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
@@ -43,7 +46,18 @@ export default function NewPost() {
       });
 
       if (!response.ok) {
-        return response; // TODO: fix bad request on new post creation.
+        toast.error("Error while creating post, please try again.", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+
+        return;
       }
 
       navigate(0);
@@ -74,6 +88,7 @@ export default function NewPost() {
 
   return (
     <form id="new-post" className="p-2" onSubmit={handleSubmitNewPost}>
+      <ToastContainer />
       <textarea
         placeholder="What's on my mind?"
         name="post_text"

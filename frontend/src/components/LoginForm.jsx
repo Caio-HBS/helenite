@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
 
 import { loginActions } from "../store/login-slice.js";
 import { userInfoActions } from "../store/user-info-slice.js";
+import "react-toastify/dist/ReactToastify.css";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
@@ -39,8 +41,17 @@ export default function LoginForm() {
     if (!response.ok) {
       setValidation(false);
       setSendingRequest(false);
-
-      return response;
+      toast.error("Error while trying to login, please try again.", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+      return;
     }
 
     const resData = await response.json();
@@ -69,7 +80,7 @@ export default function LoginForm() {
       setValidation(false);
       setSendingRequest(false);
 
-      return response; //TODO: fix bad request on login.
+      return;
     }
 
     const userInfoResData = await userInfoRes.json();
@@ -77,7 +88,10 @@ export default function LoginForm() {
     localStorage.setItem("user-fullname", userInfoResData.get_full_name);
     localStorage.setItem("user-username", userInfoResData.username);
     localStorage.setItem("user-pfp", userInfoResData.pfp);
-    localStorage.setItem("profile-slug", userInfoResData.endpoint.slice(16, -1));
+    localStorage.setItem(
+      "profile-slug",
+      userInfoResData.endpoint.slice(16, -1)
+    );
 
     dispatch(userInfoActions.setUserInfo());
 
@@ -97,6 +111,7 @@ export default function LoginForm() {
       onSubmit={handleSubmit}
       className="flex flex-col h-screen items-center justify-center relative"
     >
+      <ToastContainer />
       <div className="text-center p-10 rounded-md bg-helenite-dark-grey shadow-md shadow-stone-900">
         <div className="flex">
           <input

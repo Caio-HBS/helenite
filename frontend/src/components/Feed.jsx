@@ -1,6 +1,9 @@
 import React from "react";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
@@ -31,8 +34,18 @@ export default function FeedComponent({ newPostComponent }) {
     });
 
     if (!response.ok) {
-      // TODO: fix bad request on like.
-      return response;
+      toast.error("Error while liking post, please try again.", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+
+      return;
     }
 
     navigate(0);
@@ -40,6 +53,7 @@ export default function FeedComponent({ newPostComponent }) {
 
   return (
     <>
+      <ToastContainer />
       <div className="flex min-h-screen h-full">
         <Sidebar />
         <div className="flex-1 p-4 flex mx-52">

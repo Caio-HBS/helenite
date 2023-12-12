@@ -44,8 +44,7 @@ export async function loader({ request, params }) {
   }
 
   if (!response.ok) {
-    // TODO: fix bad request on search loader.
-    return response;
+    return [];
   }
 
   const resData = await response.json();
