@@ -7,9 +7,11 @@ import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
 import PostDetailPage, {
   loader as postDetailLoader,
 } from "./pages/PostDetail.jsx";
+import ProfileDetailPage, {
+  loader as profileLoader,
+} from "./pages/ProfileDetail.jsx";
 import DiscoverPage, { loader as discoverLoader } from "./pages/Discover.jsx";
 import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
-import ProfileDetailPage from "./pages/ProfileDetail.jsx";
 import SettingsPage from "./pages/Settings.jsx";
 import AboutUsPage from "./pages/AboutUs.jsx";
 import SearchPage, { loader as searchLoader } from "./pages/Search.jsx";
@@ -47,7 +49,11 @@ const router = createBrowserRouter([
     element: <ProtectedRoutes />,
     errorElement: <ErrorPage />,
     children: [
-      { path: ":username", element: <ProfileDetailPage /> },
+      {
+        path: ":username",
+        element: <ProfileDetailPage />,
+        loader: profileLoader,
+      },
       { path: ":username/settings", element: <SettingsPage /> },
     ],
   },
