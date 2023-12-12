@@ -77,6 +77,7 @@ export default function LoginForm() {
     localStorage.setItem("user-fullname", userInfoResData.get_full_name);
     localStorage.setItem("user-username", userInfoResData.username);
     localStorage.setItem("user-pfp", userInfoResData.pfp);
+    localStorage.setItem("profile-slug", userInfoResData.endpoint.slice(16, -1));
 
     dispatch(userInfoActions.setUserInfo());
 
