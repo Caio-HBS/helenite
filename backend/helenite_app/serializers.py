@@ -128,6 +128,7 @@ class FeedForSingleProfileSerializer(ProfileSerializer):
         model = Profile
         fields = ProfileSerializer.Meta.fields + [
             "birthday",
+            "birth_place",
             "posts",
         ]
 
@@ -135,6 +136,7 @@ class FeedForSingleProfileSerializer(ProfileSerializer):
         if obj.show_birthday:
             return obj.birthday
         return None
+    
 
 
 class SinglePostSerializer(FeedSerializer):
