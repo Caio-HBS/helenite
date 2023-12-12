@@ -55,14 +55,14 @@ export default function FeedComponent({ newPostComponent }) {
                 key={post.endpoint}
               >
                 <div id="post-header" className="flex">
-                  <Link to={`/profile/${post.profile.username}`}>
+                  <Link to={`/profile/${post.profile.endpoint.slice(16, -1)}`}>
                     <img
                       src={post.profile.pfp}
                       className="rounded-full w-20 h-20 object-cover"
                     />
                   </Link>
                   <div id="name-username" className="m-1">
-                    <Link to={`/profile/${post.profile.username}`}>
+                    <Link to={`/profile/${post.profile.endpoint.slice(16, -1)}`}>
                       <h2 className="hover:underline text-lg">
                         <strong>{post.profile.get_full_name}</strong>
                       </h2>
