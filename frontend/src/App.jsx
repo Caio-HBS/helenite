@@ -4,6 +4,10 @@ import { Helmet } from "react-helmet";
 
 import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
 
+import SettingsPage, {
+  loader as settingsLoader,
+  action as settingsAction,
+} from "./pages/Settings.jsx";
 import PostDetailPage, {
   loader as postDetailLoader,
 } from "./pages/PostDetail.jsx";
@@ -11,10 +15,10 @@ import ProfileDetailPage, {
   loader as profileLoader,
 } from "./pages/ProfileDetail.jsx";
 import DiscoverPage, { loader as discoverLoader } from "./pages/Discover.jsx";
-import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
-import SettingsPage from "./pages/Settings.jsx";
-import AboutUsPage from "./pages/AboutUs.jsx";
 import SearchPage, { loader as searchLoader } from "./pages/Search.jsx";
+import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
+import AboutUsPage from "./pages/AboutUs.jsx";
+import FriendsPage from "./pages/Friends.jsx";
 import Register from "./pages/Register.jsx";
 import RootLayout from "./pages/Root.jsx";
 import ErrorPage from "./pages/Error.jsx";
@@ -54,7 +58,16 @@ const router = createBrowserRouter([
         element: <ProfileDetailPage />,
         loader: profileLoader,
       },
-      { path: ":username/settings", element: <SettingsPage /> },
+      {
+        path: ":username/settings",
+        element: <SettingsPage />,
+        loader: settingsLoader,
+        action: settingsAction,
+      },
+      {
+        path: ":username/friends",
+        element: <FriendsPage />,
+      },
     ],
   },
   {
