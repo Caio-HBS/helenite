@@ -38,7 +38,7 @@ export default function ProfileFeed() {
   }
 
   return (
-    <div className="flex items-center justify-center mx-40 m-5 min-h-screen h-full rounded-lg bg-helenite-dark-grey">
+    <div className="flex justify-center mx-40 m-5 min-h-screen h-full rounded-lg bg-helenite-dark-grey">
       <div
         id="posts-container"
         className="bg-helenite-dark-grey rounded-md w-full items-start p-4"

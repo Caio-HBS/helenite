@@ -1,11 +1,16 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { useLoaderData } from "react-router-dom";
 import { format, parseISO } from "date-fns";
 
 import BirthplaceWithFlag from "./BirthplaceWithFlag.jsx";
 
 export default function ProfileHeader() {
+  // TODO: add friend button functionality and styling.
+
   const response = useLoaderData();
+
+  const currentUser = useSelector((state) => state.userInfo.username);
 
   const parsedBirthday = parseISO(response.birthday);
   const formattedBirthday = format(parsedBirthday, "MM/dd/yyyy");
@@ -33,6 +38,11 @@ export default function ProfileHeader() {
         </p>
         <BirthplaceWithFlag birth_place={response.birth_place} />
       </div>
+      {currentUser !== response.username && (
+        <form className="text-right">
+          <button>Add friend</button>
+        </form>
+      )}
     </div>
   );
 }
