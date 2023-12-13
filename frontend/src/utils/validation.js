@@ -60,7 +60,7 @@ export function isBirthplace(value) {
  * Returns a boolean based on the value being a valid password or not.
  */
 export function isValidPassword(value) {
-  if (valor.length > 8 && value.trim() === value) {
+  if (value.length > 8 && value.trim() === value) {
     const hasLetter = /[a-zA-Z]/.test(value);
     const hasNum = /\d/.test(value);
 

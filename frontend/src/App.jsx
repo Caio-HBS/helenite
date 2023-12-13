@@ -4,10 +4,7 @@ import { Helmet } from "react-helmet";
 
 import ProtectedRoutes from "./components/ProtectedRoutes.jsx";
 
-import SettingsPage, {
-  loader as settingsLoader,
-  action as settingsAction,
-} from "./pages/Settings.jsx";
+import SettingsPage, { loader as settingsLoader } from "./pages/Settings.jsx";
 import PostDetailPage, {
   loader as postDetailLoader,
 } from "./pages/PostDetail.jsx";
@@ -62,7 +59,6 @@ const router = createBrowserRouter([
         path: ":username/settings",
         element: <SettingsPage />,
         loader: settingsLoader,
-        action: settingsAction,
       },
       {
         path: ":username/friends",

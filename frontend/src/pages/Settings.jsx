@@ -22,10 +22,9 @@ export default function SettingsPage() {
 
 export async function loader({ request, params }) {
   const token = localStorage.getItem("token");
-  const currentUser = localStorage.getItem("user-username");
 
   const response = await fetch(
-    `${backendURL}/api/v1/profile/${currentUser}/change-settings/`,
+    `${backendURL}/api/v1/profile/${params.username}/change-settings/`,
     {
       method: "GET",
       headers: {
@@ -40,12 +39,9 @@ export async function loader({ request, params }) {
   }
 
   if (!response.ok) {
-    const resData = await response.json();
-    return resData;
+    return {};
   }
 
   const resData = await response.json();
   return resData;
 }
-
-export async function action({ request, params }) {}
