@@ -136,7 +136,6 @@ class FeedForSingleProfileSerializer(ProfileSerializer):
         if obj.show_birthday:
             return obj.birthday
         return None
-    
 
 
 class SinglePostSerializer(FeedSerializer):
@@ -361,3 +360,29 @@ class ProfileSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ["username", "pfp", "endpoint", "get_full_name"]
+
+
+class ProfileFriendsSerializer(serializers.ModelSerializer):
+    """
+    This serializer is responsible for displaying the results of a query for the
+    given slug's friends.
+
+    Fields:
+        - username: the username chosen by the user (unique);
+        - pfp: the user's profile picture;
+        - endpoint: the url for that user's profile;
+        - get_full_name: the user's full name.
+        - friends: a serializer that returns all the fields above for each friend
+        associated with the profile.
+    """
+
+    username = serializers.CharField(source="user.username")
+    friends = ProfileSearchSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ["username", "pfp", "get_full_name", "friends"]
+
+    def get_friends(self, profile):
+        friends = profile.friends.all()
+        return ProfileSearchSerializer(friends, many=True).dat

@@ -1,6 +1,7 @@
 from django.utils import timezone
 
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 from rest_framework import generics, serializers, status
@@ -24,6 +25,7 @@ from helenite_app.serializers import (
     UserRegistrationSerializer,
     NewCommentSerializer,
     ProfileSearchSerializer,
+    ProfileFriendsSerializer,
 )
 from helenite_app.authentication import TokenAuthentication
 from helenite_app.permissions import TokenAgePermission, IsUserPermission
@@ -93,7 +95,8 @@ class RegisterCreateAPIView(generics.CreateAPIView):
     """
 
     serializer_class = UserRegistrationSerializer
-    http_method_names = ["post", "options"]
+    http_method_names = ["post", "head", "options"]
+    parser_classes = [JSONParser, MultiPartParser]
     authentication_classes = []
     permission_classes = []
 
@@ -226,11 +229,11 @@ class SearchListView(generics.ListAPIView):
         index = self.request.GET.get("index", "Helenite_Profile")
 
         if not query or query == "":
-            return None;
+            return None
         if not index or index == "":
-            return None;
+            return None
         if index != "Helenite_Profile" and index != "Helenite_Post":
-            return None;
+            return None
 
         results_from_algolia = client.perform_search(query, index)
 
@@ -277,6 +280,28 @@ class ProfileRetriveAPIView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         queryset = Profile.objects.filter()
+        return queryset
+
+
+class FriendsListAPIView(generics.ListAPIView):
+    """
+    View to retrieve a list of friends for a given profile based on the custom_slug_profile.
+
+    Inherits from DRF's ListAPIView to provide a list of friends associated with
+    a given profile.
+
+    Endpoint URL: /api/v1/profile/<slug:custom_slug_profile>/friends/
+    HTTP Methods Allowed: GET
+    """
+
+    serializer_class = ProfileFriendsSerializer
+    permission_classes = [IsAuthenticated, TokenAgePermission]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+
+    def get_queryset(self):
+        queryset = Profile.objects.filter(
+            custom_slug_profile=self.kwargs["custom_slug_profile"]
+        )
         return queryset
 
 
