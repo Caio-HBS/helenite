@@ -1,7 +1,6 @@
 from django.utils import timezone
 
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 from rest_framework import generics, serializers, status
@@ -15,7 +14,7 @@ from rest_framework.authtoken.models import Token
 
 from helenite_app import client
 
-from helenite_app.models import Profile, Post, Like
+from helenite_app.models import Profile, FriendRequest, Post, Like
 from helenite_app.serializers import (
     FeedSerializer,
     NewPostSerializer,
@@ -261,16 +260,16 @@ class SearchListView(generics.ListAPIView):
         return Response(self.get_serializer(search_results, many=True).data)
 
 
-# TODO: add "new friend" functionality.
-class ProfileRetriveAPIView(generics.RetrieveAPIView):
+class ProfileRetriveAPIView(generics.RetrieveUpdateAPIView):
     """
-    View to retrieve a single profile based on the custom_slug_profile.
+    View to retrieve a single profile based on the custom_slug_profile, also responsible
+    for creating and accepting friend requests.
 
     Inherits from DRF's RetrieveAPIView to provide a single profile alongside its
     posts.
 
     Endpoint URL: /api/v1/profile/<slug:custom_slug_profile>/
-    HTTP Methods Allowed: GET
+    HTTP Methods Allowed: GET, POST, PUT.
     """
 
     lookup_field = "custom_slug_profile"
@@ -281,6 +280,79 @@ class ProfileRetriveAPIView(generics.RetrieveAPIView):
     def get_queryset(self):
         queryset = Profile.objects.filter()
         return queryset
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def _check_permissions(self, request, profile):
+        if request.user != profile.user:
+            return True
+
+    def _check_existing_request(self, request, profile, method):
+        if method == "POST":
+            existing_request = FriendRequest.objects.filter(
+                request_made_by=request.user, request_sent_to=profile.user
+            )
+        if method == "PUT":
+            existing_request = FriendRequest.objects.filter(
+                request_made_by=profile.user, request_sent_to=request.user
+            )
+        if existing_request.exists():
+            return True
+
+    def post(self, request, *args, **kwargs):
+        profile = self.get_object()
+
+        if self._check_permissions(request, profile):
+            if not self._check_existing_request(request, profile, "POST"):
+                FriendRequest.objects.create(
+                    request_made_by=request.user, request_sent_to=profile.user
+                )
+                return Response(
+                    {"message": "Friend request created successfully."},
+                    status=status.HTTP_201_CREATED,
+                )
+            else:
+                return Response(
+                    {"message": "This friend request already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            return Response(
+                {"message": "You can't be friends with yourself :("},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+    def put(self, request, *args, **kwargs):
+        profile = self.get_object()
+
+        if self._check_existing_request(request, profile, "PUT"):
+            get_request = FriendRequest.objects.get(
+                request_made_by=profile.user, request_sent_to=request.user
+            )
+            if request.user == get_request.request_sent_to:
+                get_request.accepted = True
+                get_request.save()
+
+                request.user.profile.friends.add(profile)
+                profile.friends.add(request.user.profile)
+
+                get_request.delete()
+                return Response(
+                    {"message": "Friendship added successfully"},
+                    status=status.HTTP_200_OK,
+                )
+            return Response(
+                {"message": "You don't have permission to do that."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        else:
+            return Response(
+                {"message": "This request doens't exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class FriendsListAPIView(generics.ListAPIView):

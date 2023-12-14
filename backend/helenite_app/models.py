@@ -114,11 +114,12 @@ class FriendRequest(models.Model):
     accepted = models.BooleanField(default=False)
 
     def __str__(self):
-        return (
-            f"{self.request_made_by} -> {self.request_sent_to} (status:{self.accepted})"
-        )
+        return f"{self.request_made_by} -> {self.request_sent_to} (status: {'accepted' if self.accepted else 'pending'})"
 
     def save(self, **kwargs):
+        """
+        Provides an semi-unique id for the request.
+        """
         if not self.request_id:
             self.request_id = "".join(
                 random.choice(string.ascii_letters + string.digits) for _ in range(5)
