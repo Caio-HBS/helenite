@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 
 class Profile(models.Model):
     """
-    An exstention of the ``User`` model provided by Django
+    An extension of the ``User`` model provided by Django.
 
     Attributes:
         user: the standard ``User`` provided by Django;
@@ -62,7 +62,7 @@ class Profile(models.Model):
 
     def is_public(self) -> bool:
         """
-        Returns the opposite of "private_profile" for Algolia search engine 
+        Returns the opposite of "private_profile" for Algolia search engine
         purposes.
         """
 
@@ -89,6 +89,41 @@ class Profile(models.Model):
         """
 
         return self.get_absolute_url()
+
+
+class FriendRequest(models.Model):
+    """
+    Represents a Friend request object.
+
+    Attributes:
+        request_made_by: the ``User`` that created the request;
+        request_sent_to: the ``User`` to which the request was sent;
+        created_at: the time of creation;
+        request_id: the id of the request (created automatically);
+        accepted: the status of the request (defaults to False).
+    """
+
+    request_made_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="friend_requests_sent"
+    )
+    request_sent_to = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="friend_requests_received"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    request_id = models.CharField(max_length=5, null=False, blank=False)
+    accepted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return (
+            f"{self.request_made_by} -> {self.request_sent_to} (status:{self.accepted})"
+        )
+
+    def save(self, **kwargs):
+        if not self.request_id:
+            self.request_id = "".join(
+                random.choice(string.ascii_letters + string.digits) for _ in range(5)
+            )
+        super().save(**kwargs)
 
 
 class Post(models.Model):
@@ -158,10 +193,10 @@ class Post(models.Model):
         """
 
         return self.get_absolute_url()
-    
+
     def is_public(self) -> bool:
         """
-        Returns the opposite of "private_profile" for Algolia search engine 
+        Returns the opposite of "private_profile" for Algolia search engine
         purposes.
         """
 
@@ -206,7 +241,7 @@ class Comment(models.Model):
     comment_parent_post = models.ForeignKey(Post, on_delete=models.CASCADE)
     comment_text = models.TextField(max_length=500, null=False, blank=False)
     comment_publication_date = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"{self.comment_text[:16]}... - by: {self.comment_user.username}, in {self.comment_parent_post.post_parent_user.username}"
 
