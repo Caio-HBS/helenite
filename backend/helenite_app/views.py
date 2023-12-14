@@ -305,6 +305,12 @@ class ProfileRetriveAPIView(generics.RetrieveUpdateAPIView):
     def post(self, request, *args, **kwargs):
         profile = self.get_object()
 
+        if profile in request.user.profile.friends.all():
+            return Response(
+                {"message": "You are already friends."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if self._check_permissions(request, profile):
             if not self._check_existing_request(request, profile, "POST"):
                 FriendRequest.objects.create(

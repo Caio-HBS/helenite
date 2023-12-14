@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from django.contrib.auth.models import User
 
-from helenite_app.models import Profile, Post, Comment
+from helenite_app.models import Profile, FriendRequest, Post, Comment
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -108,6 +108,20 @@ class FeedWithoutProfileInfoSerializer(FeedSerializer):
         ]
 
 
+class FriendRequestSerializer(serializers.ModelSerializer):
+    request_username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FriendRequest
+        fields = [
+            "request_username",
+            "created_at",
+        ]
+
+    def get_request_username(self, obj):
+        return obj.request_made_by.username if obj.request_made_by else None
+
+
 class FeedForSingleProfileSerializer(ProfileSerializer):
     """
     This serializer is responsible for providing the feed for the single profile
@@ -116,19 +130,22 @@ class FeedForSingleProfileSerializer(ProfileSerializer):
     Fields:
         - profile: the profile info;
         - posts: the posts made by the user through `FeedWithoutProfileInfoSerializer` (ready_only);
-        - birthday: shows the birthday should the user allow on settings.
+        - birthday: shows the birthday should the user allow on settings;
+        - friend_requests: returns the requests associated with the account.
     """
 
     posts = FeedWithoutProfileInfoSerializer(
         many=True, source="user.created_posts", read_only=True
     )
     birthday = serializers.SerializerMethodField()
+    friend_requests = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = ProfileSerializer.Meta.fields + [
             "birthday",
             "birth_place",
+            "friend_requests",
             "posts",
         ]
 
@@ -136,6 +153,15 @@ class FeedForSingleProfileSerializer(ProfileSerializer):
         if obj.show_birthday:
             return obj.birthday
         return None
+
+    def get_friend_requests(self, obj):
+        user = self.context["request"].user
+        if user == obj.user:
+            friend_requests = FriendRequest.objects.filter(request_sent_to=obj.user)
+            serializer = FriendRequestSerializer(friend_requests, many=True)
+            return serializer.data
+        else:
+            return None
 
 
 class SinglePostSerializer(FeedSerializer):
