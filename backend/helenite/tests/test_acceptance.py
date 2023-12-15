@@ -12,7 +12,7 @@ from rest_framework.authtoken.models import Token
 from helenite import settings
 
 from helenite_app.views import SearchListView
-from helenite_app.models import Profile, Post
+from helenite_app.models import FriendRequest, Profile, Post
 
 
 test_data_path = os.path.join(settings.BASE_DIR, r"helenite/tests/")
@@ -347,6 +347,227 @@ def test_profile_endpoint(
 
     assert invalid_response.status_code == 404
     assert "Not found." in invalid_response.data["detail"]
+
+
+def test_create_friend_request_on_profile_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+):
+    """
+    Tests that a given user can create a friendship request.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    new_user_2 = User.objects.create(
+        username="test2", email="email@myemail.com", password="dfhsjkalf6789"
+    )
+    valid_data_for_user_and_profile["user"] = new_user_2
+    valid_data_for_user_and_profile["custom_slug_profile"] = "test2222"
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    client = APIClient()
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.post(
+        reverse("profile_info_endpoint", kwargs={"custom_slug_profile": "test2222"}),
+        headers=headers,
+    )
+
+    assert response.status_code == 201
+    assert response.json()["message"] == "Friend request created successfully."
+
+
+def test_create_friend_request_with_self_on_profile_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+):
+    """
+    Tests that an user can't create a friendship request with themselves.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    client = APIClient()
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.post(
+        reverse(
+            "profile_info_endpoint",
+            kwargs={
+                "custom_slug_profile": valid_data_for_user_and_profile[
+                    "custom_slug_profile"
+                ]
+            },
+        ),
+        headers=headers,
+    )
+
+    assert response.status_code == 403
+    assert response.json()["message"] == "You can't be friends with yourself :("
+
+
+def test_create_existing_friend_request_on_profile_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+):
+    """
+    Tests that an user who already created a friend request can't recreate it.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    new_user_2 = User.objects.create(
+        username="test2", email="email@myemail.com", password="dfhsjkalf6789"
+    )
+    valid_data_for_user_and_profile["user"] = new_user_2
+    valid_data_for_user_and_profile["custom_slug_profile"] = "test2222"
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    client = APIClient()
+    headers = {"Authorization": f"Bearer {token}"}
+    first_request = client.post(
+        reverse("profile_info_endpoint", kwargs={"custom_slug_profile": "test2222"}),
+        headers=headers,
+    )
+
+    assert first_request.status_code == 201
+    assert first_request.json()["message"] == "Friend request created successfully."
+
+    headers = {"Authorization": f"Bearer {token}"}
+    second_request = client.post(
+        reverse("profile_info_endpoint", kwargs={"custom_slug_profile": "test2222"}),
+        headers=headers,
+    )
+
+    second_request.status_code == 400
+    second_request.json()["message"] == "This friend request already exists."
+
+
+def test_create_friend_request_already_friends_on_profile_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+):
+    """
+    Tests that two users that are already friends can't create new friendship
+    requests with each other.
+    """
+
+    user, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user
+    user1 = Profile.objects.create(**valid_data_for_user_and_profile)
+
+    new_user_2 = User.objects.create(
+        username="test2", email="email@myemail.com", password="dfhsjkalf6789"
+    )
+    valid_data_for_user_and_profile["user"] = new_user_2
+    valid_data_for_user_and_profile["custom_slug_profile"] = "test2"
+    user2 = Profile.objects.create(**valid_data_for_user_and_profile)
+
+    user2.friends.add(user1)
+
+    assert Profile.objects.count() == 2
+    assert user1 in user2.friends.all()
+
+    client = APIClient()
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.post(
+        reverse("profile_info_endpoint", kwargs={"custom_slug_profile": "test2"}),
+        headers=headers,
+    )
+
+    assert response.status_code == 400
+    assert response.json()["message"] == "You are already friends."
+
+
+def test_accept_friend_request_on_profile_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+):
+    """
+    Tests that an user who received a friend request can accept it.
+    """
+
+    user2, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user2
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    user1 = User.objects.create(
+        username="test2", email="email@myemail.com", password="dfhsjkalf6789"
+    )
+    valid_data_for_user_and_profile["user"] = user1
+    valid_data_for_user_and_profile["custom_slug_profile"] = "test2222"
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    FriendRequest.objects.create(request_made_by=user1, request_sent_to=user2)
+
+    client = APIClient()
+    headers = {"Authorization": f"Bearer {token}"}
+    accept_request = client.put(
+        reverse("profile_info_endpoint", kwargs={"custom_slug_profile": "test2222"}),
+        headers=headers,
+    )
+
+    assert accept_request.status_code == 200
+    assert accept_request.json()["message"] == "Friendship added successfully."
+
+
+def test_accept_friend_request_non_existant_on_profile_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+):
+    """
+    Tests that an user can't accept a request that wasn't created in the first
+    place.
+    """
+
+    user2, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user2
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    user1 = User.objects.create(
+        username="test2", email="email@myemail.com", password="dfhsjkalf6789"
+    )
+    valid_data_for_user_and_profile["user"] = user1
+    valid_data_for_user_and_profile["custom_slug_profile"] = "test2222"
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    client = APIClient()
+    headers = {"Authorization": f"Bearer {token}"}
+    accept_request = client.put(
+        reverse("profile_info_endpoint", kwargs={"custom_slug_profile": "test2222"}),
+        headers=headers,
+    )
+
+    assert accept_request.status_code == 400
+    assert accept_request.json()["message"] == "This request doens't exist."
+
+
+def test_accept_friend_request_with_self_on_profile_endpoint(
+    db, user_and_token, valid_data_for_user_and_profile
+):
+    """
+    Tests that an user can't accept a friend request created by themselves.
+    """
+
+    user2, token = user_and_token
+    valid_data_for_user_and_profile["user"] = user2
+    Profile.objects.create(**valid_data_for_user_and_profile)
+
+    client = APIClient()
+    headers = {"Authorization": f"Bearer {token}"}
+    accept_request = client.put(
+        reverse(
+            "profile_info_endpoint",
+            kwargs={
+                "custom_slug_profile": valid_data_for_user_and_profile[
+                    "custom_slug_profile"
+                ]
+            },
+        ),
+        headers=headers,
+    )
+
+    assert accept_request.status_code == 400
+    assert accept_request.json()["message"] == "This request doens't exist."
 
 
 def test_change_settings_endpoint(
