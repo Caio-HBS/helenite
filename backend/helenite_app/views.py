@@ -347,7 +347,7 @@ class ProfileRetriveAPIView(generics.RetrieveUpdateAPIView):
 
                 get_request.delete()
                 return Response(
-                    {"message": "Friendship added successfully"},
+                    {"message": "Friendship added successfully."},
                     status=status.HTTP_200_OK,
                 )
             return Response(
