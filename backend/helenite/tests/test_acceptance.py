@@ -570,6 +570,44 @@ def test_accept_friend_request_with_self_on_profile_endpoint(
     assert accept_request.json()["message"] == "This request doens't exist."
 
 
+def test_friends_endpoint(db, user_and_token, valid_data_for_user_and_profile):
+    """
+    Tests the friends endpoint.
+    """
+
+    (
+        user,
+        token,
+    ) = user_and_token
+    user1 = Profile.objects.create(**valid_data_for_user_and_profile)
+
+    client = APIClient()
+    headers = {"Authorization": f"Bearer {token}"}
+    response_with_no_friends = client.get(
+        reverse("profile_friends_endpoint", kwargs={"custom_slug_profile": "test"}),
+        headers=headers,
+    )
+
+    assert len(response_with_no_friends.data["results"][0]["friends"]) == 0
+
+    new_user_2 = User.objects.create(
+        username="test2", email="email@myemail.com", password="dfhsjkalf6789"
+    )
+    valid_data_for_user_and_profile["user"] = new_user_2
+    valid_data_for_user_and_profile["custom_slug_profile"] = "test2"
+    user2 = Profile.objects.create(**valid_data_for_user_and_profile)
+
+    user2.friends.add(user1)
+
+    response_with_friends = client.get(
+        reverse("profile_friends_endpoint", kwargs={"custom_slug_profile": "test"}),
+        headers=headers,
+    )
+
+    assert response_with_friends.status_code == 200
+    assert "test2" == response_with_friends.data["results"][0]["friends"][0]["username"]
+
+
 def test_change_settings_endpoint(
     db, user_and_token, valid_data_for_user_and_profile
 ) -> None:
