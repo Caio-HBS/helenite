@@ -16,6 +16,8 @@ const userInfoSlice = createSlice({
       state.pfp = localStorage.getItem("user-pfp") || "";
       state.profileSlug = localStorage.getItem("profile-slug");
       state.userPK = localStorage.getItem("user-pk") || "";
+      state.friendRequests =
+        JSON.parse(localStorage.getItem("friend-requests")) || [];
     },
     logout(state) {
       state.fullname = "";
@@ -28,6 +30,8 @@ const userInfoSlice = createSlice({
       localStorage.removeItem("profile-slug");
       state.userPK = "";
       localStorage.removeItem("user-pk");
+      state.friendRequests = [];
+      localStorage.removeItem("friend-requests");
     },
   },
 });

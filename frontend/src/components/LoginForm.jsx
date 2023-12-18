@@ -84,6 +84,10 @@ export default function LoginForm() {
     }
 
     const userInfoResData = await userInfoRes.json();
+    const friendRequestUsernames = [];
+    userInfoResData.friend_requests.forEach((request) => {
+      friendRequestUsernames.push(request.request_username);
+    });
 
     localStorage.setItem("user-fullname", userInfoResData.get_full_name);
     localStorage.setItem("user-username", userInfoResData.username);
@@ -91,6 +95,10 @@ export default function LoginForm() {
     localStorage.setItem(
       "profile-slug",
       userInfoResData.endpoint.slice(16, -1)
+    );
+    localStorage.setItem(
+      "friend-requests",
+      JSON.stringify(friendRequestUsernames)
     );
 
     dispatch(userInfoActions.setUserInfo());
