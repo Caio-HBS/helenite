@@ -27,8 +27,9 @@ export default function SearchList() {
                 <div
                   id="single-profile-container"
                   className="flex flex-col rounded-md p-1 hover:bg-helenite-light-grey"
+                  key={profile.endpoint}
                 >
-                  <Link to={`/profile/${profile.username}`}>
+                  <Link to={`/profile/${profile.endpoint.slice(16, -1)}`}>
                     <div id="profile-container">
                       <img
                         src={profile.pfp}

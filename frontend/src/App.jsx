@@ -15,7 +15,7 @@ import DiscoverPage, { loader as discoverLoader } from "./pages/Discover.jsx";
 import SearchPage, { loader as searchLoader } from "./pages/Search.jsx";
 import FeedPage, { loader as feedLoader } from "./pages/Feed.jsx";
 import AboutUsPage from "./pages/AboutUs.jsx";
-import FriendsPage from "./pages/Friends.jsx";
+import FriendsPage, { loader as friendsLoader } from "./pages/Friends.jsx";
 import Register from "./pages/Register.jsx";
 import RootLayout from "./pages/Root.jsx";
 import ErrorPage from "./pages/Error.jsx";
@@ -63,6 +63,7 @@ const router = createBrowserRouter([
       {
         path: ":username/friends",
         element: <FriendsPage />,
+        loader: friendsLoader,
       },
     ],
   },
