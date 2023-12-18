@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 
 import HeleniteFullLogo from "/helenite_full_logo.png";
+import algoliaLogo from "/Algolia-logo-white.svg";
 import { loginActions } from "../store/login-slice.js";
 import { userInfoActions } from "../store/user-info-slice.js";
 
@@ -11,6 +12,7 @@ const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
 export default function MainNavigationBar() {
   const [inputSearchValue, setInputSearchValue] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const isLoggedIn = useSelector((state) => state.login.isLoggedIn);
 
@@ -28,6 +30,10 @@ export default function MainNavigationBar() {
     const newValue = uniqueWords.join(" ");
 
     setInputSearchValue(newValue);
+  }
+
+  function handleToggleDropdown() {
+    setShowDropdown(!showDropdown);
   }
 
   async function handleLogout() {
@@ -61,6 +67,7 @@ export default function MainNavigationBar() {
 
   async function handleSubmitSearch(event) {
     event.preventDefault();
+    setShowDropdown(!showDropdown);
 
     if (inputSearchValue !== "") {
       const searchUrl = `/search?q=${encodeURIComponent(inputSearchValue)}`;
@@ -100,8 +107,15 @@ export default function MainNavigationBar() {
                 placeholder="I'm looking for..."
                 value={inputSearchValue}
                 onChange={handleInputChange}
+                onClick={handleToggleDropdown}
                 className="bg-helenite-white text-helenite-dark-grey focus:outline-none focus:border-0 focus:outline-helenite-light-blue h-12"
               />
+              {showDropdown && (
+                <div className="flex absolute mt-2 p-2 h-12 rounded-sm border bg-helenite-dark-grey">
+                  <p className="text-sm pr-2 text-white">powered by:</p>
+                  <img src={algoliaLogo} alt="Algolia Logo" />
+                </div>
+              )}
             </div>
             <button className="bg-helenite-light-blue text-helenite-dark-grey hover:text-gray-500 ml-1 px-4 py-2">
               Search
