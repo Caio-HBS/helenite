@@ -12,7 +12,6 @@ import TransformDate from "./TransformDate.jsx";
 import NewPost from "./NewPost.jsx";
 
 export default function FeedComponent({ newPostComponent }) {
-  // BUG: user loses scroll position on like.
   const token = localStorage.getItem("token");
 
   const navigate = useNavigate();

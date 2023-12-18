@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
@@ -22,7 +23,17 @@ export default function NewComment({ navigate, currentUser, token, endpoint }) {
       });
 
       if (!response.ok) {
-        // TODO: fix bad request on new comment.
+        toast.error("Error while trying to submit comment, please try again.", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+        return;
       }
 
       navigate(0);

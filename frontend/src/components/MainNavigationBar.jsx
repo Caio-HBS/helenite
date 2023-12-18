@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
 
 import HeleniteFullLogo from "/helenite_full_logo.png";
 import { loginActions } from "../store/login-slice.js";
@@ -39,7 +40,17 @@ export default function MainNavigationBar() {
     });
 
     if (!response.ok) {
-      // TODO: fix bad request on logout.
+      toast.error("Error while trying to logout, please try again.", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+      return;
     }
 
     dispatch(loginActions.logout());
@@ -52,9 +63,7 @@ export default function MainNavigationBar() {
     event.preventDefault();
 
     if (inputSearchValue !== "") {
-      const searchUrl = `/search?q=${encodeURIComponent(
-        inputSearchValue
-      )}`;
+      const searchUrl = `/search?q=${encodeURIComponent(inputSearchValue)}`;
 
       navigate(searchUrl);
     }
@@ -65,6 +74,7 @@ export default function MainNavigationBar() {
 
   return (
     <header className="fixed w-full">
+      <ToastContainer />
       <nav className="bg-helenite-dark-grey p-2 flex">
         <div>
           <ul className="text-helenite-light-blue flex">

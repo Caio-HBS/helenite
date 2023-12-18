@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 
 const backendURL = import.meta.env.VITE_REACT_BACKEND_URL;
 
@@ -32,8 +33,17 @@ export default function SinglePost() {
     });
 
     if (!response.ok) {
-      // TODO: fix bad request on like.
-      return response;
+      toast.error("Error while trying to like post, please try again.", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+      return;
     }
 
     navigate(0);
@@ -54,7 +64,16 @@ export default function SinglePost() {
     );
 
     if (!fetchDeleteResponse.ok) {
-      // TODO: fix bad request on post delete.
+      toast.error("Error while trying to delete post, please try again.", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     }
 
     const resData = await fetchDeleteResponse.json();
