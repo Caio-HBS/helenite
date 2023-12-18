@@ -1,4 +1,4 @@
-import { countries } from "country-list";
+import { countries, getName } from "country-list";
 
 /**
  * Returns a boolean based on the value being a valid username or not.
@@ -51,7 +51,7 @@ export function isDate(value) {
  */
 export function isBirthplace(value) {
   if (value.trim() === value) {
-    return countries.getName(value) !== null;
+    return getName(value) !== null;
   }
   return false;
 }
