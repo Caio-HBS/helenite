@@ -13,7 +13,7 @@ export default function FriendsPage() {
       </Helmet>
       <div>
         <div className="pt-16 bg-stone-800">
-          <SearchList />
+          <SearchList isFriends={true} />
         </div>
       </div>
     </>

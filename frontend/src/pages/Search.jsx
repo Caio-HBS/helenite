@@ -13,7 +13,7 @@ export default function SearchPage() {
       </Helmet>
       <div>
         <div className="pt-16 bg-stone-800">
-          <SearchList />
+          <SearchList isFriends={false} />
         </div>
       </div>
     </>

@@ -58,7 +58,7 @@ export default function FeedComponent({ newPostComponent }) {
         <div className="flex-1 p-4 flex mx-52">
           <div
             id="posts-container"
-            className="bg-helenite-dark-grey rounded-md items-start p-4"
+            className="bg-helenite-dark-grey rounded-md items-start p-4 min-w-full"
           >
             {newPostComponent && <NewPost />}
             {response.results.map((post) => (

@@ -3,7 +3,7 @@ import { Link, useLoaderData } from "react-router-dom";
 
 import Sidebar from "./Sidebar.jsx";
 
-export default function SearchList() {
+export default function SearchList({ isFriends }) {
   const response = useLoaderData();
 
   return (
@@ -18,7 +18,11 @@ export default function SearchList() {
             {response.length === 0 && (
               <div>
                 <p className="text-2xl text-helenite-white">
-                  <strong>Sorry, we couldn't find any matches.</strong>
+                  <strong>
+                    {isFriends
+                      ? "This user has no friends yet :("
+                      : "Sorry, we couldn't find any matches."}
+                  </strong>
                 </p>
               </div>
             )}
