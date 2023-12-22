@@ -16,7 +16,7 @@ export default function ParticlesComponent() {
   return (
     <Particles
       id="particles-component"
-      className="bg-cover bg-center h-screen absolute"
+      className="bg-cover bg-center h-screen w-full absolute"
       init={particlesInit}
       loaded={particlesLoaded}
       options={particlesOptions}
