@@ -66,7 +66,7 @@ export default function LoginForm() {
     dispatch(loginActions.setLoginCredentials());
 
     const userInfoRes = await fetch(
-      `${backendURL}/api/v1/profile/${data.username}/`,
+      `${backendURL}/api/v1/profile/${data.slug}/`,
       {
         method: "GET",
         headers: {
@@ -159,6 +159,15 @@ export default function LoginForm() {
           >
             Show password
           </button>
+          <div className="flex mt-2 text-helenite-dark-grey">
+            <input
+              type="text"
+              name="slug"
+              placeholder="Path to your profile"
+              className={inputClass}
+              required
+            />
+          </div>
         </div>
         {!validation && (
           <p className="text-left pt-1 pb-0 text-red-600">
